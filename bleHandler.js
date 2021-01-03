@@ -400,7 +400,7 @@ class BleHandler
     // -----------------------------------------------------------------------------------
     startSyncing( sensor, rootAddress )
     {
-        var addressSlice = rootAddress.split(":");
+        var addressSlice = rootAddress.split("-");
 
         if ( addressSlice.length != 6 )
         {
