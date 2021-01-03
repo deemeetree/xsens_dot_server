@@ -54,6 +54,11 @@ const RECORDINGS_PATH = "/data/",
 // State transitions table
 // =======================================================================================
 
+const OSC = require('osc-js')
+
+const options = { open: { port: 49162, host: 'localhost'} }
+const osc = new OSC({ plugin: new OSC.DatagramPlugin(options) })
+
 var transitions =
 [
     // -- Powering-on --
@@ -880,6 +885,40 @@ var transitions =
 		transFunc:function( component, parameters )
 	    {
             component.lastTimestamp = parameters.timestamp;
+
+            osc.on('open', () => {
+              
+                // setInterval(() => {
+                //    // send these messages to `localhost:11245`
+                //    osc.send(new OSC.Message('/response', Math.random()), {port: 4000})
+                // }, 1000)
+            })
+            console.log('PARAMS SENT')
+            console.log(parameters)
+
+            if (parameters.address == 'd4-22-cd-00-03-74') {
+                osc.send(new OSC.Message('/acc_x/2', parameters.acc_x), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/acc_y/2', parameters.acc_y), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/acc_z/2', parameters.acc_z), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/gyr_x/2', parameters.gyr_x), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/gyr_y/2', parameters.gyr_y), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/gyr_z/2', parameters.gyr_z), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/mag_x/2', parameters.mag_x), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/mag_y/2', parameters.mag_y), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/mag_z/2', parameters.mag_z), {port: 49162, host: 'localhost'})
+            }
+            else if (parameters.address == 'd4-22-cd-00-03-56') {
+                osc.send(new OSC.Message('/acc_x/1', parameters.acc_x), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/acc_y/1', parameters.acc_y), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/acc_z/1', parameters.acc_z), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/gyr_x/1', parameters.gyr_x), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/gyr_y/1', parameters.gyr_y), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/gyr_z/1', parameters.gyr_z), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/mag_x/1', parameters.mag_x), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/mag_y/1', parameters.mag_y), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/mag_z/1', parameters.mag_z), {port: 49162, host: 'localhost'})
+            }
+
             component.csvBuffer += Object.values(parameters).join() + '\n';
 
             component.gui.sendGuiEvent( 'sensorOrientation', parameters );

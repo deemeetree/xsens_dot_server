@@ -5,10 +5,11 @@
     "dependencies": {
         "@abandonware/noble": "^1.9.2-8",
         "express": "^4.17.1",
+        "hashmap": "^2.4.0",
         "ip": "^1.1.5",
         "noble-mac": "https://github.com/Timeular/noble-mac.git",
+        "osc-js": "^2.1.0",
         "quaternion": "^1.1.0",
-        "socket.io": "^2.3.0",
-        "hashmap": "^2.4.0"
+        "socket.io": "^2.3.0"
     }
 }
