@@ -54,10 +54,28 @@ const RECORDINGS_PATH = "/data/",
 // State transitions table
 // =======================================================================================
 
+// Activate OSC server
 const OSC = require('osc-js')
 
 const options = { open: { port: 49162, host: 'localhost'} }
 const osc = new OSC({ plugin: new OSC.DatagramPlugin(options) })
+
+// Activate Python connection
+var spawn = require('child_process').spawn
+
+var beep = require('beepbeep')
+
+// Define the Python DFA script to be used
+let py = []
+let py_iterations = 0 
+let should_restart = true
+
+var interval_data = []
+var interval_dataString = ''
+var interval_iterations = 0
+var first_time = true
+
+
 
 var transitions =
 [
@@ -893,8 +911,10 @@ var transitions =
                 //    osc.send(new OSC.Message('/response', Math.random()), {port: 4000})
                 // }, 1000)
             })
-            console.log('PARAMS SENT')
+            console.log('Getting Parameters')
             console.log(parameters)
+            console.log('Iteration:', interval_iterations)
+            console.log('Array length:', interval_data.length)
 
             if (parameters.address == 'd4-22-cd-00-03-74') {
                 osc.send(new OSC.Message('/acc_x/2', parameters.acc_x), {port: 49162, host: 'localhost'})
@@ -906,6 +926,82 @@ var transitions =
                 osc.send(new OSC.Message('/mag_x/2', parameters.mag_x), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/mag_y/2', parameters.mag_y), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/mag_z/2', parameters.mag_z), {port: 49162, host: 'localhost'})
+                
+                // Get the accelerometer data into the interval_data variable
+                interval_data.push((Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3)
+
+                /* Considering we are at 60 Hz we want the DFA check function to load every 20 seconds  
+                after the first 40 seconds, so 60 x 40 = 2400 iterations, then 1200 */
+
+                interval_iterations++
+
+                if (interval_iterations == 1200) {
+                    
+                        if (!first_time) {
+
+
+                            py[py_iterations] = spawn('python', ['dfa.py'])
+                            /*We have to stringify the data first otherwise our python process wont recognize it*/
+                            py[py_iterations].stdin.write(JSON.stringify(interval_data));
+
+                            /*Here we are saying that every time our node application receives data from the python process output stream(on 'data'), we want to convert that received data into a string and append it to the overall dataString.*/
+                            py[py_iterations].stdout.on('data', function(data){
+                                interval_dataString += data.toString();
+                            });
+                            
+                            /*Once the stream is done (on 'end') we want to simply log the received data to the console.*/
+                            py[py_iterations].stdout.on('end', function(){
+
+                                console.log('Alpha Component:',interval_dataString);
+                                console.log('based on the array length:', interval_data.length)
+                                
+                                if (interval_dataString < 0.42) {
+                                    console.log('negative correlation')
+                                    beep([0,1100,1100,400,400])
+                                }
+                                else if (interval_dataString >= 0.42 && interval_dataString <= 0.58) {
+                                    console.log('random white noise movement')
+                                    beep(3)
+                                }
+                                else if (interval_dataString > 0.58 && interval_dataString < 0.90) {
+                                    console.log('regular, mundane movement')
+                                    beep([0,1100,1100,400,400])
+                                }
+                                else if (interval_dataString > 0.90 && interval_dataString < 1.10) {
+                                    console.log('fractal movement')
+                                    beep(5)
+                                }
+                                else if (interval_dataString > 1.10) {
+                                    console.log('organized, highly complex (pathological) movement')
+                                    beep([0,400,400,400,400,400,400,400])
+                                }
+
+                                interval_data = interval_data.filter((_, i) => i >= 1200)
+
+                                interval_dataString = ''
+    
+                                py_iterations++
+
+                            });
+
+                        
+                            py[py_iterations].stdin.end();
+
+                            // Remove the first 1200 elements from the interval_data array for the next iteration
+
+                       
+
+                        }
+                        else {
+                            // next time the function will fire
+                            first_time = false
+                        }
+                    
+                        // reset counter
+                        interval_iterations = 0
+
+                }
+
             }
             else if (parameters.address == 'd4-22-cd-00-03-56') {
                 osc.send(new OSC.Message('/acc_x/1', parameters.acc_x), {port: 49162, host: 'localhost'})
@@ -1158,6 +1254,14 @@ function startRecordingToFile( component, name )
     {
         component.eventHandler( 'fsClose' );
     });
+
+    // Reset parameters
+
+    interval_data = []
+    interval_dataString = ''
+    interval_iterations = 0
+    first_time = true
+
 }
 
 // =======================================================================================

@@ -5,13 +5,13 @@ import sys, json, numpy as np
 #Read data from stdin
 def read_in():
     
-    #lines = sys.stdin.readlines()
+    lines = sys.stdin.readlines()
     #Since our input would only be having one line, parse our JSON data from that
     
-    #return json.loads(lines[0])
+    return json.loads(lines[0])
     
-    lines = "[1,2]" # for testing
-    return json.loads(lines) # for testing
+    #lines = "[1,2]" # for testing
+    #return json.loads(lines) # for testing
 
 def main():
     #get our data as an array from read_in()
@@ -25,6 +25,8 @@ def main():
 
     #return the sum to the output stream
     print(lines_sum)
+
+    os.close()
 
 #start process
 if __name__ == '__main__':
