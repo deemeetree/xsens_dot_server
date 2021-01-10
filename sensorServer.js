@@ -916,7 +916,7 @@ var transitions =
             console.log('Iteration:', interval_iterations)
             console.log('Array length:', interval_data.length)
 
-            if (parameters.address == 'd4-22-cd-00-03-74') {
+            if (parameters.address == 'd4-22-cd-00-03-56') {
                 osc.send(new OSC.Message('/acc_x/2', parameters.acc_x), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/acc_y/2', parameters.acc_y), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/acc_z/2', parameters.acc_z), {port: 49162, host: 'localhost'})
@@ -929,6 +929,7 @@ var transitions =
                 
                 // Get the accelerometer data into the interval_data variable
                 interval_data.push((Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3)
+                // interval_data.push(Math.abs(parameters.acc_x))
 
                 /* Considering we are at 60 Hz we want the DFA check function to load every 20 seconds  
                 after the first 40 seconds, so 60 x 40 = 2400 iterations, then 1200 */
@@ -954,21 +955,22 @@ var transitions =
 
                                 console.log('Alpha Component:',interval_dataString);
                                 console.log('based on the array length:', interval_data.length)
+                                console.log(' ')
                                 
                                 if (interval_dataString < 0.42) {
-                                    console.log('negative correlation')
-                                    beep([0,1100,1100,400,400])
+                                    console.log('negative correlation, mean-reverting')
+                                    beep([0,400,400,1100,1100,400])
                                 }
                                 else if (interval_dataString >= 0.42 && interval_dataString <= 0.58) {
-                                    console.log('random white noise movement')
+                                    console.log('random white noise movement, unpredictable')
                                     beep(3)
                                 }
                                 else if (interval_dataString > 0.58 && interval_dataString < 0.90) {
-                                    console.log('regular, mundane movement')
-                                    beep([0,1100,1100,400,400])
+                                    console.log('regular, mundane movement, positive feedback')
+                                    beep([0,1100,1100,400,400,1100])
                                 }
                                 else if (interval_dataString > 0.90 && interval_dataString < 1.10) {
-                                    console.log('fractal movement')
+                                    console.log('fractal movement, self-similar')
                                     beep(5)
                                 }
                                 else if (interval_dataString > 1.10) {
@@ -1003,7 +1005,7 @@ var transitions =
                 }
 
             }
-            else if (parameters.address == 'd4-22-cd-00-03-56') {
+            else if (parameters.address == 'd4-22-cd-00-03-74') {
                 osc.send(new OSC.Message('/acc_x/1', parameters.acc_x), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/acc_y/1', parameters.acc_y), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/acc_z/1', parameters.acc_z), {port: 49162, host: 'localhost'})
