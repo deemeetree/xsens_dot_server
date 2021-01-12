@@ -937,6 +937,7 @@ var transitions =
 
             }
             else if (parameters.address == 'd4-22-cd-00-03-56') {
+
                 if (!interval_data[parameters.address]) {
                     interval_data[parameters.address] = []
                 }
@@ -953,6 +954,7 @@ var transitions =
                 osc.send(new OSC.Message('/mag_x/1', parameters.mag_x), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/mag_y/1', parameters.mag_y), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/mag_z/1', parameters.mag_z), {port: 49162, host: 'localhost'})
+                
             }
 
              /* Considering we are at 60 Hz we want the DFA check function to load every 20 seconds  
@@ -962,8 +964,6 @@ var transitions =
 
              let max_iterations = 1200
              let total_sensors = 1
-             
-             
 
              if (Object.keys(interval_data).length != 0) {
                  total_sensors = Object.keys(interval_data).length
@@ -979,7 +979,7 @@ var transitions =
                            
                              for (let iter in interval_data[sensor]) {
                                  if (_interval_data[iter]) {
-                                    _interval_data[iter] += interval_data[sensor][iter] 
+                                    _interval_data[iter] -= interval_data[sensor][iter] 
                                  } 
                                  else {
                                     _interval_data[iter] = interval_data[sensor][iter]
@@ -987,9 +987,9 @@ var transitions =
                              }
                          }
 
-                         for (let iter in _interval_data) {
-                            _interval_data[iter] = _interval_data[iter] / total_sensors
-                         }
+                        //  for (let iter in _interval_data) {
+                        //     _interval_data[iter] = _interval_data[iter] / total_sensors
+                        //  }
 
                          console.log('Total Sensors:', total_sensors)
                          console.log('Firing the Function on Data')
