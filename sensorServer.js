@@ -66,12 +66,12 @@ var spawn = require('child_process').spawn
 var beep = require('beepbeep')
 
 // Define the Python DFA script to be used
-let py = []
+let py = {}
 let py_iterations = 0 
 let should_restart = true
 
 var interval_data = {}
-var interval_dataString = ''
+var interval_dataString = {}
 var interval_iterations = 0
 var first_time = true
 
@@ -915,7 +915,9 @@ var transitions =
             // console.log(parameters)
             // console.log('Iteration:', interval_iterations)
            
-
+            // TODO don't attach to address, instead the signals go to each sensor code 
+            // TODO port set up in the interface
+            // TODO change the interface make it easier
             if (parameters.address == 'd4-22-cd-00-03-74') {
 
                 if (!interval_data[parameters.address]) {
@@ -954,7 +956,7 @@ var transitions =
                 osc.send(new OSC.Message('/mag_x/1', parameters.mag_x), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/mag_y/1', parameters.mag_y), {port: 49162, host: 'localhost'})
                 osc.send(new OSC.Message('/mag_z/1', parameters.mag_z), {port: 49162, host: 'localhost'})
-                
+
             }
 
              /* Considering we are at 60 Hz we want the DFA check function to load every 20 seconds  
@@ -963,95 +965,40 @@ var transitions =
              interval_iterations++
 
              let max_iterations = 1200
+
+
+             // If we have more than 1 sensor, we multiply this max by the numeber of sensors
+
              let total_sensors = 1
 
              if (Object.keys(interval_data).length != 0) {
                  total_sensors = Object.keys(interval_data).length
              }
 
+             // Fix it so that we measure whether to trigger based on the number of values in each sensor
+
              if (interval_iterations == max_iterations * total_sensors) {
                  
                      if (!first_time) {
-                        
-                         let _interval_data = []
 
-                         for (let sensor in interval_data) {
-                           
-                             for (let iter in interval_data[sensor]) {
-                                 if (_interval_data[iter]) {
-                                    _interval_data[iter] -= interval_data[sensor][iter] 
-                                 } 
-                                 else {
-                                    _interval_data[iter] = interval_data[sensor][iter]
-                                 }
-                             }
-                         }
-
-                        //  for (let iter in _interval_data) {
-                        //     _interval_data[iter] = _interval_data[iter] / total_sensors
-                        //  }
-
-                         console.log('Total Sensors:', total_sensors)
                          console.log('Firing the Function on Data')
                          console.log(interval_data)
-                         console.log('Interval Data:', _interval_data)
+                        
+                         // For each sensor, calculate the Fractal signature
+
+                         for (let sensor in interval_data) {
 
 
-                         py[py_iterations] = spawn('python', ['dfa.py'])
-                         /*We have to stringify the data first otherwise our python process wont recognize it*/
-                         py[py_iterations].stdin.write(JSON.stringify(_interval_data));
+                            calculateDFA(sensor, interval_data, py_iterations, max_iterations) 
+      
 
-                         /*Here we are saying that every time our node application receives data from the python process output stream(on 'data'), we want to convert that received data into a string and append it to the overall dataString.*/
-                         py[py_iterations].stdout.on('data', function(data){
-                             interval_dataString += data.toString();
-                         });
-                         
-                         /*Once the stream is done (on 'end') we want to simply log the received data to the console.*/
-                         py[py_iterations].stdout.on('end', function(){
+                         }
 
-                             console.log('Alpha Component:',interval_dataString);
-                             console.log('based on the array length:', _interval_data.length)
-                             console.log(' ')
-                             
-                             if (interval_dataString < 0.42) {
-                                 console.log('negative correlation, mean-reverting')
-                                 beep([0,400,400,1100,1100,400])
-                             }
-                             else if (interval_dataString >= 0.42 && interval_dataString <= 0.58) {
-                                 console.log('random white noise movement, unpredictable')
-                                 beep(3)
-                             }
-                             else if (interval_dataString > 0.58 && interval_dataString < 0.90) {
-                                 console.log('regular, mundane movement, positive feedback')
-                                 beep([0,1100,1100,400,400,1100])
-                             }
-                             else if (interval_dataString > 0.90 && interval_dataString < 1.10) {
-                                 console.log('fractal movement, self-similar')
-                                 beep(5)
-                             }
-                             else if (interval_dataString > 1.10) {
-                                 console.log('organized, highly complex (pathological) movement')
-                                 beep([0,400,400,400,400,400,400,400])
-                             }
+                         py_iterations++
 
-                             for (let sensor in interval_data) {
-                                interval_data[sensor] = interval_data[sensor].filter((_, i) => i >= max_iterations)
-                             }
-                             
+                        
 
-                             interval_dataString = ''
- 
-                             py_iterations++
-
-                         });
-
-                     
-                         py[py_iterations].stdin.end();
-
-                         // Remove the first 1200 elements from the interval_data array for the next iteration
-
-                    
-
+                                        
                      }
                      else {
                          // next time the function will fire
@@ -1306,17 +1253,104 @@ function startRecordingToFile( component, name )
     // Reset parameters
 
     interval_data = {}
-    interval_dataString = ''
+    interval_dataString = {}
     interval_iterations = 0
     first_time = true
 
 }
 
-// ---------------------------------------------------------------------------------------
-// -- Start recording to file --
-// ---------------------------------------------------------------------------------------
 
 
+// ---------------------------------------------------------------------------------------
+// -- Calculate chaos signature of the movement --
+// ---------------------------------------------------------------------------------------
+
+function calculateDFA(sensor, interval_data, py_iterations, max_iterations) {
+
+     if (!py[sensor]) {
+        py[sensor] = []
+     }
+
+     // Create a python process for this sensor 
+     py[sensor][py_iterations] = spawn('python', ['dfa.py'])
+    
+     // We have to stringify the data first otherwise our python process wont recognize it
+     py[sensor][py_iterations].stdin.write(JSON.stringify(interval_data[sensor]));
+
+     py[sensor][py_iterations].stdin.end();
+
+     /*Here we are saying that every time our node application receives data 
+     from the python process output stream(on 'data'), 
+     we want to convert that received data into a string 
+     and append it to the overall dataString.*/
+
+     if (!interval_dataString[sensor]) {
+         interval_dataString[sensor] = ''
+     }
+
+     py[sensor][py_iterations].stdout.on('data', function(data){
+         interval_dataString[sensor] = data.toString();
+     });
+
+     
+      /*Once the stream is done (on 'end') we want to simply log the received data to the console.*/
+     py[sensor][py_iterations].stdout.on('end', function(){
+
+         console.log('Sensor:',sensor);
+         console.log('Alpha Component:',parseFloat(interval_dataString[sensor]));
+         console.log('based on the array length:', interval_data[sensor].length)
+         console.log(' ')
+       
+
+         if (interval_dataString[sensor] < 0.42) {
+             console.log('negative correlation, mean-reverting')
+             
+             // beep([0,400,400,1100,1100,400])
+         }
+         else if (interval_dataString[sensor] >= 0.42 && interval_dataString[sensor] <= 0.58) {
+             console.log('random white noise movement, unpredictable')
+             // beep(3)
+         }
+         else if (interval_dataString[sensor] > 0.58 && interval_dataString[sensor] < 0.90) {
+             console.log('regular, mundane movement, positive feedback')
+             // beep([0,1100,1100,400,400,1100])
+         }
+         else if (interval_dataString[sensor] > 0.90 && interval_dataString[sensor] < 1.10) {
+             console.log('fractal movement, self-similar')
+            //  beep(5)
+         }
+         else if (interval_dataString[sensor] > 1.10) {
+             console.log('organized, highly complex (pathological) movement')
+             // beep([0,400,400,400,400,400,400,400])
+         }
+
+         // TODO make another function which sends composite OSC
+
+         interval_data[sensor] = interval_data[sensor].filter((_, i) => i >= max_iterations)
+
+         for (let i = 0; i < 20; i++) {
+
+            setTimeout(()=>{
+                osc.send(new OSC.Message('/alpha/' + sensor, parseFloat(interval_dataString[sensor])), {port: 49162, host: 'localhost'})
+            },50*i)
+
+            if (i == 19) {
+                setTimeout(()=>{
+                    interval_dataString[sensor] = ''
+                },2000)
+            }
+         }
+
+     });
+
+ 
+     
+
+     // Remove the first 1200 elements from the interval_data array for the next iteration
+
+     
+
+}
 
 // =======================================================================================
 // Export the Sensor Server class
