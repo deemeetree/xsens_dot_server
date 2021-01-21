@@ -73,11 +73,13 @@ class FunctionalComponent
 
         var entryString = this.globalCurrentState + '-' + eventName;
         var transition  = this.globalStateMachineTable[entryString];
+
+
         if( transition == undefined )
         {
             console.log
             ( 
-                "ERROR: component '" + this.name + "' " +
+                "ERROR 1: component '" + this.name + "' " +
                 "received unexpected event '" + eventName + "' " +
                 "in state '" + this.globalCurrentState + "'"
             );
@@ -88,7 +90,7 @@ class FunctionalComponent
         {
             console.log
             (
-                "ERROR: component '" + this.name + "' " +
+                "ERROR 1: component '" + this.name + "' " +
                 "has undefined transition function for event '" + eventName + "' " +
                 "in state '" + this.globalCurrentState + "'"
             );
@@ -97,6 +99,7 @@ class FunctionalComponent
 
         transition.transFunc( this, parameters );
 
+        
         var previousState = this.globalCurrentState;
         this.globalCurrentState = transition.nextState;
 
@@ -122,6 +125,7 @@ class FunctionalComponent
         {
             this.globalEventHandler('no' );
         }
+        
     }
 
     eventHandler( eventName, parameters )
@@ -184,6 +188,11 @@ class FunctionalComponent
             this.globalEventHandler( eventName, parameters );
             return;
         }
+        else 
+        if (eventName == 'oscUpdate') {
+            this.globalEventHandler( eventName, parameters );
+            return;
+        }
 
         if ( parameters == undefined ) 
         {
@@ -219,7 +228,7 @@ class FunctionalComponent
         {
             console.log
             ( 
-                "ERROR: component '" + this.name + "' " +
+                "ERROR 2: component '" + this.name + "' " +
                 "received unexpected event '" + eventName + "' " +
                 "in state '" + currentState + "'"
             );
@@ -230,7 +239,7 @@ class FunctionalComponent
         {
             console.log
             (
-                "ERROR: component '" + this.name + "' " +
+                "ERROR 2: component '" + this.name + "' " +
                 "has undefined transition function for event '" + eventName + "' " +
                 "in state '" + currentState + "'"
             );

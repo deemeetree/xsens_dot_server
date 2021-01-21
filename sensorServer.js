@@ -57,8 +57,8 @@ const RECORDINGS_PATH = "/data/",
 // Activate OSC server
 const OSC = require('osc-js')
 
-const options = { open: { port: 49162, host: 'localhost'} }
-const osc = new OSC({ plugin: new OSC.DatagramPlugin(options) })
+let osc_options = { open: { port: 49162, host: 'localhost'} }
+let osc = new OSC({ plugin: new OSC.DatagramPlugin(osc_options) })
 
 // Activate Python connection
 var spawn = require('child_process').spawn
@@ -89,6 +89,26 @@ var transitions =
 		transFunc:function( component, parameters )
 	    {
             // NOP
+	    }
+    },
+    {
+		stateName: 'Idle',
+        eventName: 'oscUpdate',
+        nextState: 'Idle',
+		
+		transFunc:function( component, parameters )
+	    {
+            console.log('OSC UPDATE')
+            let _osc_options = osc_options.open
+            osc.close({_osc_options});
+            
+            console.log('OSC update port:',parameters.port)
+            console.log('OSC update host:',parameters.host)
+
+            osc_options = { open: { port: parameters.port, host: parameters.host} }
+            osc = new OSC({ plugin: new OSC.DatagramPlugin(osc_options) })
+            console.log(osc.status())
+
 	    }
     },
     {
@@ -905,7 +925,7 @@ var transitions =
             component.lastTimestamp = parameters.timestamp;
 
             osc.on('open', () => {
-              
+                console.log('NEW OSC OPEN', osc_options)
                 // setInterval(() => {
                 //    // send these messages to `localhost:11245`
                 //    osc.send(new OSC.Message('/response', Math.random()), {port: 4000})
@@ -927,15 +947,15 @@ var transitions =
                     interval_data[parameters.address].push((Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3)
                 }
                 
-                osc.send(new OSC.Message('/acc_x/2', parameters.acc_x), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/acc_y/2', parameters.acc_y), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/acc_z/2', parameters.acc_z), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/gyr_x/2', parameters.gyr_x), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/gyr_y/2', parameters.gyr_y), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/gyr_z/2', parameters.gyr_z), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/mag_x/2', parameters.mag_x), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/mag_y/2', parameters.mag_y), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/mag_z/2', parameters.mag_z), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/acc_x/2', parameters.acc_x), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/acc_y/2', parameters.acc_y), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/acc_z/2', parameters.acc_z), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/gyr_x/2', parameters.gyr_x), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/gyr_y/2', parameters.gyr_y), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/gyr_z/2', parameters.gyr_z), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/mag_x/2', parameters.mag_x), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/mag_y/2', parameters.mag_y), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/mag_z/2', parameters.mag_z), {port: osc_options.open.port, host: osc_options.open.host})
 
             }
             else if (parameters.address == 'd4-22-cd-00-03-56') {
@@ -947,15 +967,15 @@ var transitions =
                     interval_data[parameters.address].push((Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3)
                 }
                 
-                osc.send(new OSC.Message('/acc_x/1', parameters.acc_x), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/acc_y/1', parameters.acc_y), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/acc_z/1', parameters.acc_z), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/gyr_x/1', parameters.gyr_x), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/gyr_y/1', parameters.gyr_y), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/gyr_z/1', parameters.gyr_z), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/mag_x/1', parameters.mag_x), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/mag_y/1', parameters.mag_y), {port: 49162, host: 'localhost'})
-                osc.send(new OSC.Message('/mag_z/1', parameters.mag_z), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/acc_x/1', parameters.acc_x), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/acc_y/1', parameters.acc_y), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/acc_z/1', parameters.acc_z), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/gyr_x/1', parameters.gyr_x), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/gyr_y/1', parameters.gyr_y), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/gyr_z/1', parameters.gyr_z), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/mag_x/1', parameters.mag_x), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/mag_y/1', parameters.mag_y), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/mag_z/1', parameters.mag_z), {port: osc_options.open.port, host: osc_options.open.host})
 
             }
 
@@ -1331,7 +1351,7 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations) {
          for (let i = 0; i < 20; i++) {
 
             setTimeout(()=>{
-                osc.send(new OSC.Message('/alpha/' + sensor, parseFloat(interval_dataString[sensor])), {port: 49162, host: 'localhost'})
+                osc.send(new OSC.Message('/alpha/' + sensor, parseFloat(interval_dataString[sensor])), {port: osc_options.open.port, host: osc_options.open.host})
             },50*i)
 
             if (i == 19) {

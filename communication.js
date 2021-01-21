@@ -46,6 +46,8 @@ var scanControlButton,
     measurementMode,
     headingResetTip,
     headingResetButton,
+    oscPortInput,
+    oscHostInput,
     syncControlButton;
 
 var discoveredSensors = [],
@@ -100,6 +102,11 @@ window.onload = function( eventName, parameters  )
 
     syncControlButton = document.getElementById("syncControlButton");
     syncControlButton.hidden = measurementControlButton.hidden;
+
+    oscPortInput= document.getElementById("osc_port");
+    oscHostInput = document.getElementById("osc_host");
+
+    getLocalStorageOSCData()
 
     getConnectedSensors();
 
@@ -253,6 +260,10 @@ function setEventHandlerFunctions()
     };
 
     eventHandlerFunctions[  'allSensorsEnabled' ] = function( eventName, parameters  )
+    {
+    };
+
+    eventHandlerFunctions[  'oscUpdate' ] = function( eventName, parameters  )
     {
     };
 
@@ -681,6 +692,24 @@ function updateHeadingResetButton()
     {
         headingResetButton.innerHTML = 'Heading Reset';
     }
+}
+
+function updateOSCPort()
+{
+    localStorage.setItem('osc_port', oscPortInput.value)
+    localStorage.setItem('osc_host', oscHostInput.value)
+    sendGuiEvent( 'oscUpdate', {port:oscPortInput.value,host:oscHostInput.value} );
+}
+
+function getLocalStorageOSCData() 
+{
+    if (localStorage.getItem('osc_port')) {
+        oscPortInput.value = localStorage.getItem('osc_port')
+    }
+    if (localStorage.getItem('osc_host')) {
+        oscHostInput.value = localStorage.getItem('osc_host')
+    }
+    sendGuiEvent( 'oscUpdate', {port:oscPortInput.value,host:oscHostInput.value} );
 }
 
 function scanControlButtonClicked()
