@@ -114,6 +114,7 @@ Get more information about Xsens DOT in [Develepor Page](https://www.xsens.com/d
 ## Run Xsens DOT Server
 
 The steps below should only be performed once
+
 1. Clone repository
    ```sh
    git clone https://github.com/xsens/xsens_dot_server.git
@@ -129,6 +130,7 @@ The steps below should only be performed once
    ```
 
 If the current conda (python) environment is set to eightos, the below should work fine:
+
 4. Run Xsens DOT Server
    * Windows and macOS: `node xsensDotServer`
    * Raspberry Pi: `sudo node xsensDotServer`
