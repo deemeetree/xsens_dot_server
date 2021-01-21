@@ -10,8 +10,8 @@
 
 body 
 {
-    font: 14px 'Montserrat';
-    background-color: #43425D;
+    font: 14px 'Arial';
+    background-color: #3d3d3d;
 }
 
 body, html
@@ -153,6 +153,19 @@ body, html
     width: -webkit-calc(100% /3.09);
     width: -moz-calc(100% / 3.09);
     height: 100%;
+}
+
+
+
+#oscData {
+    display: inline-block;
+    float: left;
+    margin-top: 2px;
+    margin-left: 9px;
+}
+
+#oscData > input {
+    font: 14px 'Montserrat'!important;
 }
 
 .modal

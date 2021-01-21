@@ -45,7 +45,7 @@
 
   <body>
 
-    <img src="Xsens_DOT_Logo.png" width="500px" class="centerImg" style="padding-top: 2em;" />
+    <img src="EightOS_Logo.png" width="500px" class="centerImg" style="padding-top: 2em;" />
     <hr>
 
     <div width="500px" align="center">
@@ -56,6 +56,8 @@
         <div style="position: relative;">
           <button id="scanControlButton" class="actionButton" style="position: absolute; left: 0px; margin-top: -18px;" onclick="scanControlButtonClicked()">Start Scanning</button>
         </div>
+
+      
 
         <div style="position: relative;">
           <div style="position: absolute; left: 0px; right: 0px; margin-top: -18px;">
@@ -80,11 +82,31 @@
 
           <button id="stopMeasuringButton" class="actionButton" style="position: absolute; right: 0px; margin-top: -18px; margin-right: -4px;" onclick="stopMeasuringButtonClicked()" hidden>Stop Measuring</button>
         </div>
+       
+
+      </div>
+    </div>
+    &nbsp;<br>
+    <div width="500px" align="center">
+      <div class="wrapper">
+          
+          <button id="mapOSCPort" class="actionButton" style="position: relative; float: left; margin-left: 3px;  " onclick="updateOSCPort()">Map OSC Port</button> 
+          <span id="oscData">
+            <input type="text" name="osc_port" id="osc_port" maxlength="5" size="5" value="49162"> &nbsp; <input type="text" name="osc_host" id="osc_host" maxlength="50" size="15" value="localhost">
+          </span>
 
       </div>
     </div>
 
+    <div width="500px" align="center" style="clear:both;">
+      
+       &nbsp;
+      
+    </div>
+  
+
     <div width="500px" min-height="200px" valign="top" align="center">
+  
       <p id="DiscoveredSensors" style="font-size:14px; min-height:200px;"><p>
     </div>
     <hr>
