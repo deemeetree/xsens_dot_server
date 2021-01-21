@@ -931,61 +931,38 @@ var transitions =
                 //    osc.send(new OSC.Message('/response', Math.random()), {port: 4000})
                 // }, 1000)
             })
+
             // console.log('Getting Parameters')
             // console.log(parameters)
             // console.log('Iteration:', interval_iterations)
            
-            // TODO don't attach to address, instead the signals go to each sensor code 
-            // TODO port set up in the interface
-            // TODO change the interface make it easier
-            if (parameters.address == 'd4-22-cd-00-03-74') {
 
-                if (!interval_data[parameters.address]) {
-                    interval_data[parameters.address] = []
-                }
-                else {
-                    interval_data[parameters.address].push((Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3)
-                }
-                
-                osc.send(new OSC.Message('/acc_x/2', parameters.acc_x), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/acc_y/2', parameters.acc_y), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/acc_z/2', parameters.acc_z), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/gyr_x/2', parameters.gyr_x), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/gyr_y/2', parameters.gyr_y), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/gyr_z/2', parameters.gyr_z), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/mag_x/2', parameters.mag_x), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/mag_y/2', parameters.mag_y), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/mag_z/2', parameters.mag_z), {port: osc_options.open.port, host: osc_options.open.host})
+            
 
+            if (!interval_data[parameters.address]) {
+                interval_data[parameters.address] = []
             }
-            else if (parameters.address == 'd4-22-cd-00-03-56') {
-
-                if (!interval_data[parameters.address]) {
-                    interval_data[parameters.address] = []
-                }
-                else {
-                    interval_data[parameters.address].push((Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3)
-                }
-                
-                osc.send(new OSC.Message('/acc_x/1', parameters.acc_x), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/acc_y/1', parameters.acc_y), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/acc_z/1', parameters.acc_z), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/gyr_x/1', parameters.gyr_x), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/gyr_y/1', parameters.gyr_y), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/gyr_z/1', parameters.gyr_z), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/mag_x/1', parameters.mag_x), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/mag_y/1', parameters.mag_y), {port: osc_options.open.port, host: osc_options.open.host})
-                osc.send(new OSC.Message('/mag_z/1', parameters.mag_z), {port: osc_options.open.port, host: osc_options.open.host})
-
+            else {
+                interval_data[parameters.address].push((Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3)
             }
+            
+            osc.send(new OSC.Message('/acc_x/' + parameters.address, parameters.acc_x), {port: osc_options.open.port, host: osc_options.open.host})
+            osc.send(new OSC.Message('/acc_y/' + parameters.address, parameters.acc_y), {port: osc_options.open.port, host: osc_options.open.host})
+            osc.send(new OSC.Message('/acc_z/' + parameters.address, parameters.acc_z), {port: osc_options.open.port, host: osc_options.open.host})
+            osc.send(new OSC.Message('/gyr_x/' + parameters.address, parameters.gyr_x), {port: osc_options.open.port, host: osc_options.open.host})
+            osc.send(new OSC.Message('/gyr_y/' + parameters.address, parameters.gyr_y), {port: osc_options.open.port, host: osc_options.open.host})
+            osc.send(new OSC.Message('/gyr_z/' + parameters.address, parameters.gyr_z), {port: osc_options.open.port, host: osc_options.open.host})
+            osc.send(new OSC.Message('/mag_x/' + parameters.address, parameters.mag_x), {port: osc_options.open.port, host: osc_options.open.host})
+            osc.send(new OSC.Message('/mag_y/' + parameters.address, parameters.mag_y), {port: osc_options.open.port, host: osc_options.open.host})
+            osc.send(new OSC.Message('/mag_z/' + parameters.address, parameters.mag_z), {port: osc_options.open.port, host: osc_options.open.host})
 
+            
              /* Considering we are at 60 Hz we want the DFA check function to load every 20 seconds  
              after the first 40 seconds, so 60 x 40 = 2400 iterations, then 1200 */
 
              interval_iterations++
 
              let max_iterations = 1200
-
 
              // If we have more than 1 sensor, we multiply this max by the numeber of sensors
 
