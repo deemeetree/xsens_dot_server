@@ -1,4 +1,13 @@
-## Overview
+# EightOS xSens Fractal Control
+This modification of Xsens DOT Server records a signal from xSens DOT sensors (logging it to a CSV file) and sends it via the OSC signal to the specified port / host. 
+
+It will also apply Detrended Fluctuation Analysis to the signal (currently, the average of all acceleration signals on each sensor) and calculate its according Alpha exponent, which shows how fractal the signal is. 
+
+The Alpha exponent at around 0.5 indicates random walk (sensor in an idle state), between 0.6 and 0.9 is a positively correlated signal, betweeen 0.9 and 1.1 the signal has fractal (self-similar, scale-free) properties, more than 1.1 is a complex signal where the bigger is the scale, the higher are the deviations and they are not scale-free. 
+
+In EightOS we aim to go through various Alpha exponents in a movement session, so that both the individuals and the group can experience all the different states (randomness, positive correlation, fractality, and disruption). It relates to the variability principle described on [EightOS.IO](https://8os.io) in more detail. 
+
+## XSens Overview
 Xsens DOT Server is a simple web server that can scan, connect and start measurement with Xsens DOT on Windows, macOS and Raspberry Pi. The system is built using Node.js in combination with [Noble](https://github.com/abandonware/noble). 
 
 **Functions**
@@ -14,6 +23,7 @@ Xsens DOT Server is a simple web server that can scan, connect and start measure
   * Custom mode 3
 * Data logging
 * Heading reset
+* OSC streaming
 
 Get more information about Xsens DOT in [Develepor Page](https://www.xsens.com/developer) and [Base](https://base.xsens.com/hc/en-us/categories/360002285079-Wearable-Sensor-Platform).
 
@@ -102,20 +112,33 @@ Get more information about Xsens DOT in [Develepor Page](https://www.xsens.com/d
    ```
 
 ## Run Xsens DOT Server
+
+The steps below should only be performed once
 1. Clone repository
    ```sh
    git clone https://github.com/xsens/xsens_dot_server.git
    ```
-1. Enter Xsens DOT Server project `cd ./xsens_dot_server` and install the dependency package `npm install`
-1. Run Xsens DOT Server
+2. Enter Xsens DOT Server project `cd ./xsens_dot_server` and install the dependency package `npm install`
+3. Install conda (python package management) and activate the correct environment
+   ```
+   conda create -n eightos numpy matplotlib scipy
+   ```
+   then 
+   ```
+   conda activate eightos
+   ```
+
+If the current conda (python) environment is set to eightos, the below should work fine:
+4. Run Xsens DOT Server
    * Windows and macOS: `node xsensDotServer`
    * Raspberry Pi: `sudo node xsensDotServer`
-1. Open Xsens DOT server in browser
+  
+5. Open Xsens DOT server in browser
    * Run http://localhost:8080/ or http://127.0.0.1:8080/ you are able to use Xsens DOT Server!
 
 ## Known issues
 1. [Connection] Unable to connect sensors in Mac with Bluetooth 5.0.
-1. [Connection] Connection with firmware 1.3.0 sensors may fail in Windows. You can:
+2. [Connection] Connection with firmware 1.3.0 sensors may fail in Windows. You can:
    * use firmware 1.0.0
    * or use a Bluetooth dongle which support 4.0 or above. Refer to [Add Bluetooth adapter](#add-bluetooth-adapter) to configure your Bluetooth dongle.
 
