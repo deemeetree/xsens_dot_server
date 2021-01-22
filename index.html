@@ -61,6 +61,31 @@
 
         <div style="position: relative;">
           <div style="position: absolute; left: 0px; right: 0px; margin-top: -18px;">
+
+            <button id="launchStreamingButton" class="actionButton" hidden onclick="measurementControlButtonClicked('20')">Start Streaming</button>
+            
+          </div>
+        </div>
+
+        <div style="position: relative;">
+          <button id="stopMeasuringButton" class="actionButton" style="position: absolute; right: 0px; margin-top: -18px; margin-right: -4px;" onclick="stopMeasuringButtonClicked()" hidden>Stop Measuring</button>
+        </div>
+       
+
+      </div>
+    </div>
+    &nbsp;<br>
+    <div width="500px" align="center">
+    
+      <div class="wrapper" style="padding-top: 12px; padding-bottom: 12px;">
+        <div style="position: relative;">
+            <p class="white">Advanced Functions</p>
+        </div>
+
+      
+
+        <div style="position: relative;">
+          <div style="position: absolute; left: 0px; right: 0px; margin-top: -18px;">
             <button id="headingResetButton" class="actionButton" hidden onclick="headingResetButtonClicked()">Heading Reset</button>
 
             <div class="dropdown">
@@ -80,7 +105,6 @@
         <div style="position: relative;">
           <button id="syncControlButton" class="actionButton" hidden style="position: absolute; right: 0px; margin-top: -18px; margin-right: -4px;" onclick="syncControlButtonClicked()">Disable Sync</button>
 
-          <button id="stopMeasuringButton" class="actionButton" style="position: absolute; right: 0px; margin-top: -18px; margin-right: -4px;" onclick="stopMeasuringButtonClicked()" hidden>Stop Measuring</button>
         </div>
        
 

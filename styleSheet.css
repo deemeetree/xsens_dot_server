@@ -167,6 +167,9 @@ body, html
 #oscData > input {
     font: 14px 'Montserrat'!important;
 }
+.white {
+    color: #ffffff;
+}
 
 .modal
 {

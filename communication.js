@@ -40,6 +40,7 @@ setEventHandlerFunctions();
 
 var scanControlButton,
     measurementControlButton,
+    launchStreamingButton,
     stopMeasuringButton,
     measurementPayloadList,
     syncingModal,
@@ -88,6 +89,10 @@ window.onload = function( eventName, parameters  )
     measurementControlButton = document.getElementById("measurementControlButton");
     measurementControlButton.disabled = true;
     measurementControlButton.hidden = true;
+
+    launchStreamingButton = document.getElementById("launchStreamingButton")
+    launchStreamingButton.disabled = true;
+    launchStreamingButton.hidden = true;
 
     stopMeasuringButton = document.getElementById("stopMeasuringButton");
     stopMeasuringButton.hidden = true;
@@ -161,6 +166,7 @@ function setEventHandlerFunctions()
         }
 
         enableOrDisableMeasurementControlButton();
+        enableOrDisableLaunchStreamingButton();
 
     };
 
@@ -196,6 +202,7 @@ function setEventHandlerFunctions()
         console.log("sensorDisconnected " + connectedSensors.length);
 
         enableOrDisableMeasurementControlButton();
+        enableOrDisableLaunchStreamingButton();
 
         removeLastHeadingStatus(parameters.address);
     };
@@ -209,9 +216,12 @@ function setEventHandlerFunctions()
         measurementControlButton.disabled = (measuringSensors.length == 0);
         measurementControlButton.hidden = true;
 
+        launchStreamingButton.disabled = (measuringSensors.length == 0);
+        launchStreamingButton.hidden = true;
+
         syncControlButton.hidden = measurementControlButton.hidden;
 
-        stopMeasuringButton.innerHTML = "Stop Logging";
+        stopMeasuringButton.innerHTML = "Stop Streaming";
         stopMeasuringButton.disabled = false;
         stopMeasuringButton.hidden = false;
         
@@ -280,13 +290,16 @@ function setEventHandlerFunctions()
             measurementControlButton.disabled = !allSensorsDisabled;
             measurementControlButton.hidden = !allSensorsDisabled;
 
+            launchStreamingButton.disabled = !allSensorsDisabled;
+            launchStreamingButton.hidden = !allSensorsDisabled;
+
             syncControlButton.hidden = measurementControlButton.hidden;
         }
 
         if (allSensorsDisabled)
         {
             scanControlButton.disabled = false;
-            stopMeasuringButton.innerHTML = "Stop logging";
+            stopMeasuringButton.innerHTML = "Stop Streaming";
             measurementPayloadList.style.display = '';
 
             headingResetTip.hidden = allSensorsDisabled;
@@ -369,6 +382,7 @@ function setEventHandlerFunctions()
                 }
             } else {
                 enableOrDisableMeasurementControlButton();
+                enableOrDisableLaunchStreamingButton();
                 enableOrDisableConnectButtons(false);
             }
 
@@ -455,6 +469,12 @@ function enableOrDisableMeasurementControlButton()
     stopMeasuringButton.hidden = measuringSensors.length == 0;
 }
 
+function enableOrDisableLaunchStreamingButton()
+{
+    launchStreamingButton.disabled = connectedSensors.length == 0;
+    launchStreamingButton.hidden = connectedSensors.length == 0 || measuringSensors.length != 0;
+}
+
 function loadConnectedSensors( connectedSensors )
 {
     console.log("loadConnectedSensors " + connectedSensors);
@@ -484,6 +504,7 @@ function loadConnectedSensors( connectedSensors )
             }
     
             enableOrDisableMeasurementControlButton();
+            enableOrDisableLaunchStreamingButton();
         });
     }
 }
@@ -814,11 +835,15 @@ function measurementControlButtonClicked(payloadId)
 
     if( measurementControlButton.innerHTML == 'Start Logging' )
     {
+        console.log('starting to log')
         measurementControlButton.disabled = true;
         scanControlButton.disabled = true;
 
         measurementPayloadList.style.display = 'none';
         measurementControlButton.hidden = true;
+
+        launchStreamingButton.disabled = true;
+        launchStreamingButton.hidden = true;
 
         syncControlButton.hidden = measurementControlButton.hidden;
 
@@ -900,6 +925,7 @@ function deleteFilesButtonClick()
             selectedFiles.push( checkboxes[i].getAttribute("name") );
         }
     }
+
 
     if( selectedFiles.length == 0 ) return;
 
