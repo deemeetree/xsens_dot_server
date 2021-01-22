@@ -171,6 +171,18 @@ body, html
     color: #ffffff;
 }
 
+.white > a {
+    color: #ffffff!important;
+}
+
+.whiteish {
+    color: #bbbbbb;
+}
+
+.whiteish > a {
+    color: #bbbbbb!important;
+}
+
 .modal
 {
     display: none;

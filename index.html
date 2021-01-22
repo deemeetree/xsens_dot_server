@@ -45,7 +45,7 @@
 
   <body>
 
-    <img src="EightOS_Logo.png" width="500px" class="centerImg" style="padding-top: 2em;" />
+    <img src="EightOS_Logo_2.png" width="500px" class="centerImg" style="padding-top: 2em;" />
     <hr>
 
     <div width="500px" align="center">
@@ -132,8 +132,41 @@
     <div width="500px" min-height="200px" valign="top" align="center">
   
       <p id="DiscoveredSensors" style="font-size:14px; min-height:200px;"><p>
+
+        <span id="lastAverageAlpha" class="white">most recent average alpha: no data received</span>
+
     </div>
     <hr>
+
+    <div width="500px" class="centerImg roundBackground">
+      <div style="margin-bottom: 5em;">
+        <div style="display: flex; position: relative;">
+
+          <div style="flex: 1;">
+             <h4 style="color: white; margin-top: 2px;">EightOS Movement Recommendation:</h4>
+              <span id="alphaRecommendation" class="white">not enough alpha signal accumulated</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <div width="500px" class="centerImg roundBackground">
+      <div style="margin-bottom: 5em;">
+      <span class="whiteish">EightOS Movement Recommendation is based on the variability approach developed by <a href="https://8os.io">EightOS body-mind operating system</a> with <a href="https://noduslabs.com">Nodus Labs</a>. 
+        <br><br>
+        It analyzes the time series of human movements and detects its fractality using the detrended fractal analysis algorithm (DFA). 
+        <br><br>
+        There can be 4 states: random, organized, fractal, complex. We assume that it can be interesting to go through each of these states while staying in every one of them for a long enough time. 
+        <br><br>
+        Based on that data we will see what the current state it and what is has been. If it's been too organized for a long time, we will recommend to bring in some fractal variability. If it has been too fractal, we'll recommend to make it a bit more organized or random. If it has been too organized, we'll propose to disrupt it again. 
+        <br><br>
+        We follow this EightOS variability schema:<br><br>
+        <img src="eightos-schema.jpg">
+      </span>
+    </div>
+  </div>
 
     <div width="500px" class="centerImg roundBackground">
       <div style="margin-bottom: 5em;">
@@ -154,6 +187,8 @@
         <p style="font-weight: bold;">Syncing..., please do not refresh this page.</p>
       </div>
     </div>
+
+
 
 	</body>
 </html>
