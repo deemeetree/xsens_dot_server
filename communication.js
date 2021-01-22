@@ -85,6 +85,9 @@ const HEADING_STATUS_XRM_HEADING = 1;
 
 // alpha fractal parameters
 var alphaTimeline = {}
+var cumulativeAlphaTimeline = []
+let recommenderIterations = 4 
+
 
 
 window.onload = function( eventName, parameters  )
@@ -331,21 +334,142 @@ function setEventHandlerFunctions()
         console.log("Received Alpha", parameters)
 
         // Update HTML 
+
         let elem = document.getElementById('alpha-' + parameters.sensor)
 
         elem.innerHTML = 'alpha: ' + parseFloat(parameters.alpha).toFixed(2);
 
         // Update alphaTimeline for each sensor
+
         if (!alphaTimeline[parameters.sensor]) {
             alphaTimeline[parameters.sensor] = []
         }
 
         alphaTimeline[parameters.sensor].push(parseFloat(parameters.alpha).toFixed(2))
 
-        // Get the alpha diagnosis
+        // Show the alpha diagnosis for each sensor
+
         let alpha_type = getAlphaType(parseFloat(parameters.alpha).toFixed(2))
 
-        elem.innerHTML += ', ' + alpha_type;
+        let alpha_info = ''
+
+        if (alpha_type == 'random') {
+            alpha_info = 'random irregularity'
+         }
+         else if (alpha_type == 'organized') {
+            alpha_info = 'organized regularity'
+         }
+         else if (alpha_type == 'fractal') {
+            alpha_info = 'fractal variability'
+         }
+         else if (alpha_type == 'complex') {
+            alpha_info = 'complex phase-shifting'
+        }
+
+        elem.innerHTML += ', ' + alpha_info;
+
+        // Update the general sensor sum
+
+        
+
+        let current_length = alphaTimeline[parameters.sensor].length
+        let sensors_num = Object.keys(alphaTimeline).length
+        let cumulative_length = 0
+        
+        for (let s in alphaTimeline) {
+            cumulative_length += alphaTimeline[s].length
+        }
+        
+        // all alphas are recorded for the iteration?
+
+        let last_alphas = []
+
+        // console.log('cumulative_length', cumulative_length)
+        // console.log('sensors_num', sensors_num)
+        // console.log('current_length', current_length)
+
+        if ((cumulative_length / sensors_num) == current_length) {
+
+            for (let s in alphaTimeline) {
+                last_alphas.push(alphaTimeline[s].slice(-1).pop())
+            }
+
+            let average_alpha = 0
+            let total_alpha = 0
+    
+            for (let l of last_alphas) {
+                total_alpha += parseFloat(l)
+            }
+
+            // console.log('total_alpha', total_alpha)
+            // console.log('last_alphas.length', last_alphas.length)
+    
+            average_alpha = total_alpha / last_alphas.length
+    
+            // console.log('average_alpha',average_alpha)
+
+            cumulativeAlphaTimeline.push(average_alpha)
+
+            let cumulative_alpha_type = getAlphaType(parseFloat(average_alpha).toFixed(2))
+
+            let last_alpha_recommendation = ''
+
+            if (cumulative_alpha_type == 'random') {
+                last_alpha_recommendation = 'random irregularity'
+             }
+             else if (cumulative_alpha_type == 'organized') {
+                last_alpha_recommendation = 'organized regularity'
+             }
+             else if (cumulative_alpha_type == 'fractal') {
+                last_alpha_recommendation = 'fractal variability'
+             }
+             else if (cumulative_alpha_type == 'complex') {
+                last_alpha_recommendation = 'complex phase-shifting'
+            }
+
+            document.getElementById('lastAverageAlpha').innerHTML = 'most recent average alpha: ' + parseFloat(average_alpha).toFixed(2) + ', ' + last_alpha_recommendation
+
+            let cumAlpha = cumulativeAlphaTimeline.slice(-recommenderIterations)
+            
+            // are we at least recommenderIterations (4) iterations?
+            if (cumAlpha.length == recommenderIterations) {
+
+                let cum_alpha_recommendation = ''
+
+                let total_last = 0
+
+                for (let a of cumAlpha) {
+                    total_last += parseFloat(a)
+                } 
+
+                let avCumAlpha = total_last / recommenderIterations
+
+                let average_alpha_type = getAlphaType(parseFloat(avCumAlpha).toFixed(2))
+
+                if (average_alpha_type == 'random') {
+                    cum_alpha_recommendation = 'make it more organized or change pattern'
+                    cum_alpha_description = 'random irregularity'
+                 }
+                 else if (average_alpha_type == 'organized') {
+                    cum_alpha_recommendation = 'introduce more variability or randomness'
+                    cum_alpha_description = 'organized regularity'
+                 }
+                 else if (average_alpha_type == 'fractal') {
+                    cum_alpha_recommendation = 'completely change the pattern or regularlize'
+                    cum_alpha_description = 'fractal variability'
+                 }
+                 else if (average_alpha_type == 'complex') {
+                    cum_alpha_recommendation = 'make it more regular and mundane'
+                    cum_alpha_description = 'complex phase-shifting'
+                }
+
+                document.getElementById('alphaRecommendation').innerHTML = 'average alpha last ' + recommenderIterations + ' iterations: ' + parseFloat(avCumAlpha).toFixed(2) + ', ' + cum_alpha_description + '<br><br>has been: ' + average_alpha_type + '<br><br>try to: ' + cum_alpha_recommendation
+            }
+
+            
+        }
+
+       
 
     };
     
@@ -974,16 +1098,16 @@ function deleteFilesButtonClick()
 function getAlphaType(alpha) {
 
     if (alpha <= 0.60) {
-       return 'random irregularity'
+       return 'random'
     }
     else if (alpha > 0.60 && alpha < 0.90) {
-       return 'organized regularity'
+       return 'organized'
     }
     else if (alpha > 0.90 && alpha < 1.10) {
-       return 'fractal variability'
+       return 'fractal'
     }
     else if (alpha > 1.10) {
-       return 'complex phase-shifting'
+       return 'complex'
     }
 }
 
