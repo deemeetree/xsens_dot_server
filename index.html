@@ -54,7 +54,7 @@
 
       <div class="wrapper" style="padding-top: 12px; padding-bottom: 12px;">
         <div style="position: relative;">
-          <button id="scanControlButton" class="actionButton" style="position: absolute; left: 0px; margin-top: -18px;" onclick="scanControlButtonClicked()">Start Scanning</button>
+          <button id="scanControlButton" class="actionButton" style="position: absolute; left: 0px; margin-top: -18px;" onclick="scanControlButtonClicked()">Scan for Sensors</button>
         </div>
 
       
@@ -91,9 +91,9 @@
             <div class="dropdown">
               <button id="measurementControlButton" class="dropbtn actionButton" hidden>Start Logging</button>
               <div id="measurementPayloadList" class="dropdown-content">
-                <a id= "16" onclick="measurementControlButtonClicked(this.id)">Complete (Euler)</a>
-                <a id= "2" onclick="measurementControlButtonClicked(this.id)">Extended (Quaternion)</a>
-                <a id= "20" onclick="measurementControlButtonClicked(this.id)">Rate quantities (with mag)</a>
+                <a id= "20" onclick="measurementControlButtonClicked(this.id)">Rate quantities (with mag) with OSC Stream</a>
+                <a id= "16" onclick="measurementControlButtonClicked(this.id)">Complete (Euler) - no OSC</a>
+                <a id= "2" onclick="measurementControlButtonClicked(this.id)">Extended (Quaternion) - no OSC</a>
                 <a id= "22" onclick="measurementControlButtonClicked(this.id)">Custom mode 1</a>
                 <a id= "23" onclick="measurementControlButtonClicked(this.id)">Custom mode 2</a>
                 <a id= "24" onclick="measurementControlButtonClicked(this.id)">Custom mode 3</a>
@@ -103,7 +103,7 @@
         </div>
 
         <div style="position: relative;">
-          <button id="syncControlButton" class="actionButton" hidden style="position: absolute; right: 0px; margin-top: -18px; margin-right: -4px;" onclick="syncControlButtonClicked()">Disable Sync</button>
+          <button id="syncControlButton" class="actionButton" hidden style="position: absolute; right: 0px; margin-top: -18px; margin-right: -4px;" onclick="syncControlButtonClicked()">Enable Sync</button>
 
         </div>
        
@@ -114,7 +114,7 @@
     <div width="500px" align="center">
       <div class="wrapper">
           
-          <button id="mapOSCPort" class="actionButton" style="position: relative; float: left; margin-left: 3px;  " onclick="updateOSCPort()">Map OSC Port</button> 
+          <button id="mapOSCPort" class="actionButton" style="position: relative; float: left; margin-left: 3px;  " onclick="updateOSCPort()">Update OSC Mapping</button> 
           <span id="oscData">
             <input type="text" name="osc_port" id="osc_port" maxlength="5" size="5" value="49162"> &nbsp; <input type="text" name="osc_host" id="osc_host" maxlength="50" size="15" value="localhost">
           </span>

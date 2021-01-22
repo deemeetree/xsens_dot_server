@@ -64,7 +64,8 @@ var measuringPayloadId = -1;
 var lastSensorsDataTimeMap = [];
 var lastSensorDataTime     = 0;
 
-var isSyncingEnabled = true;
+// change this to true if sync should be enabled by default
+var isSyncingEnabled = false;
 
 const MEASURING_PAYLOAD_TYPE_COMPLETE_EULER           = '16';
 const MEASURING_PAYLOAD_TYPE_EXTENDED_QUATERNION      = '2';
@@ -138,7 +139,7 @@ function setEventHandlerFunctions()
 
     eventHandlerFunctions[  'scanningStopped' ] = function( eventName, parameters  )
     {
-        scanControlButton.innerHTML = 'Start Scanning';
+        scanControlButton.innerHTML = 'Scan for Sensors';
         scanControlButton.disabled = false;
     };
 
@@ -735,7 +736,7 @@ function getLocalStorageOSCData()
 
 function scanControlButtonClicked()
 {
-    if( scanControlButton.innerHTML == 'Start Scanning' )
+    if( scanControlButton.innerHTML == 'Scan for Sensors' )
     {
         sendGuiEvent( 'startScanning' );
         scanControlButton.innerHTML = 'Starting...';

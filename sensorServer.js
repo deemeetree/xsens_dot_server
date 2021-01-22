@@ -708,6 +708,7 @@ var transitions =
 
 		transFunc:function( component, parameters )
 	    {
+            console.log('enableSync',parameters.isSyncingEnabled);
             component.ble.enableSync( parameters.isSyncingEnabled );
 	    }
     },

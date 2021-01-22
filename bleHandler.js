@@ -75,7 +75,8 @@ class BleHandler
         this.central = require('noble-mac');
         this.setBleEventHandlers(this);
 
-        this.isSyncingEnabled = true;
+        // set this to true if the sync should be enabled by default
+        this.isSyncingEnabled = false;
 
         console.log( "BLE Handler started." );
     }
