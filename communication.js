@@ -330,9 +330,22 @@ function setEventHandlerFunctions()
     {
         console.log("Received Alpha", parameters)
 
+        // Update HTML 
         let elem = document.getElementById('alpha-' + parameters.sensor)
 
         elem.innerHTML = 'alpha: ' + parseFloat(parameters.alpha).toFixed(2);
+
+        // Update alphaTimeline for each sensor
+        if (!alphaTimeline[parameters.sensor]) {
+            alphaTimeline[parameters.sensor] = []
+        }
+
+        alphaTimeline[parameters.sensor].push(parseFloat(parameters.alpha).toFixed(2))
+
+        // Get the alpha diagnosis
+        let alpha_type = getAlphaType(parseFloat(parameters.alpha).toFixed(2))
+
+        elem.innerHTML += ', ' + alpha_type;
 
     };
     
@@ -956,6 +969,22 @@ function deleteFilesButtonClick()
     if( selectedFiles.length == 0 ) return;
 
     deleteFiles( selectedFiles );
+}
+
+function getAlphaType(alpha) {
+
+    if (alpha <= 0.60) {
+       return 'random irregularity'
+    }
+    else if (alpha > 0.60 && alpha < 0.90) {
+       return 'organized regularity'
+    }
+    else if (alpha > 0.90 && alpha < 1.10) {
+       return 'fractal variability'
+    }
+    else if (alpha > 1.10) {
+       return 'complex phase-shifting'
+    }
 }
 
 
