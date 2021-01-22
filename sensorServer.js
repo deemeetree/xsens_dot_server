@@ -987,7 +987,7 @@ var transitions =
                          for (let sensor in interval_data) {
 
 
-                            calculateDFA(sensor, interval_data, py_iterations, max_iterations) 
+                            calculateDFA(sensor, interval_data, py_iterations, max_iterations, component) 
       
 
                          }
@@ -1263,7 +1263,7 @@ function startRecordingToFile( component, name )
 // -- Calculate chaos signature of the movement --
 // ---------------------------------------------------------------------------------------
 
-function calculateDFA(sensor, interval_data, py_iterations, max_iterations) {
+function calculateDFA(sensor, interval_data, py_iterations, max_iterations, component) {
 
      if (!py[sensor]) {
         py[sensor] = []
@@ -1297,7 +1297,6 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations) {
          console.log('Sensor:',sensor);
          console.log('Alpha Component:',parseFloat(interval_dataString[sensor]));
          console.log('based on the array length:', interval_data[sensor].length)
-         console.log(' ')
        
 
          if (interval_dataString[sensor] < 0.42) {
@@ -1322,6 +1321,8 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations) {
              // beep([0,400,400,400,400,400,400,400])
          }
 
+         console.log(' ')
+
          // TODO make another function which sends composite OSC
 
          interval_data[sensor] = interval_data[sensor].filter((_, i) => i >= max_iterations)
@@ -1338,6 +1339,9 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations) {
                 },2000)
             }
          }
+
+         // Send a global event to inform the UI about the alpha
+         component.gui.sendGuiEvent( 'alphaCalculated', {sensor: sensor, alpha: interval_dataString[sensor]} );
 
      });
 

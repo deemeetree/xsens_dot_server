@@ -83,6 +83,10 @@ const TEXT_DISCONNECT = "Disconnect";
 
 const HEADING_STATUS_XRM_HEADING = 1;
 
+// alpha fractal parameters
+var alphaTimeline = {}
+
+
 window.onload = function( eventName, parameters  )
 {
     scanControlButton = document.getElementById("scanControlButton");
@@ -321,6 +325,17 @@ function setEventHandlerFunctions()
     eventHandlerFunctions[ 'recordingStopped' ] = function( eventName, parameters  )
     {
     };
+
+    eventHandlerFunctions[ 'alphaCalculated' ] = function( eventName, parameters  )
+    {
+        console.log("Received Alpha", parameters)
+
+        let elem = document.getElementById('alpha-' + parameters.sensor)
+
+        elem.innerHTML = 'alpha: ' + parseFloat(parameters.alpha).toFixed(2);
+
+    };
+    
 
     eventHandlerFunctions[  'sensorOrientation' ] = function( eventName, parameters  )
     {
@@ -561,6 +576,16 @@ function addSensorToList( sensorList, sensorListName, address, clickHandler )
     sensorAddress.style.flex = "1";
     sensorAddress.style.fontSize = "16px";
     label.appendChild(sensorAddress);
+
+    // Adding alpha component data
+    var sensorAlpha = document.createElement('label')
+    sensorAlpha.innerHTML = 'alpha: n/a';
+    sensorAlpha.id = 'alpha-' + address;
+    sensorAlpha.style.padding = "10px";
+    sensorAlpha.style.color = "#FFFFFF";
+    sensorAlpha.style.flex = "1";
+    sensorAlpha.style.fontSize = "16px";
+    label.appendChild(sensorAlpha);
 
     var connectionControlButton = document.createElement("button");
     connectionControlButton.id = ID_CONNECTION_CONTROL_BUTTON + address;
