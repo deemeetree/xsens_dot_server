@@ -87,7 +87,7 @@ const HEADING_STATUS_XRM_HEADING = 1;
 var alphaTimeline = {}
 var cumulativeAlphaTimeline = []
 var cumulativeAlphaScore = []
-let recommenderIterations = 4 
+let recommenderIterations = 3 
 
 
 
@@ -430,7 +430,7 @@ function setEventHandlerFunctions()
                 last_alpha_recommendation = 'complex phase-shifting'
             }
 
-            document.getElementById('lastAverageAlpha').innerHTML = 'most recent average alpha for all sensors: ' + parseFloat(average_alpha).toFixed(2) + ', ' + last_alpha_recommendation
+            document.getElementById('lastAverageAlpha').innerHTML = 'current average alpha for all sensors: ' + parseFloat(average_alpha).toFixed(2) + ', ' + last_alpha_recommendation
 
             let cumAlpha = cumulativeAlphaTimeline.slice(-recommenderIterations)
 
@@ -447,7 +447,7 @@ function setEventHandlerFunctions()
                     total_last += parseFloat(a)
                 } 
 
-                // what has been the average alpha the last recommenderIterations (4) iterations?
+                // what has been the average alpha the last recommenderIterations (3) iterations?
 
                 let avCumAlpha = total_last / recommenderIterations
 
@@ -476,10 +476,16 @@ function setEventHandlerFunctions()
                 let cum_alpha_score = cumScore.join(' → ')
                 let counts_alpha = {}
                 let last_two = ''
+                let first_two = ''
 
                 for (var i = 0; i < cumScore.length; i++) {
                     var val = cumScore[i];
                     counts_alpha[val] = counts_alpha[val] ? counts_alpha[val] + 1 : 1;
+                    if (i == 0) {
+                        if (cumScore[i] == cumScore[i+1]) {
+                            first_two = cumScore[i]
+                        }
+                    }
                     if (i == cumScore.length - 1) {
                         if (cumScore[i] == cumScore[i-1]) {
                             last_two = cumScore[i]
@@ -490,103 +496,74 @@ function setEventHandlerFunctions()
                 let cum_score_description = ''
                 let cum_score_recommendation = ''
                 
-                if (counts_alpha['random'] >= 3) {
-                    cum_score_description = 'mostly random'
+                if (counts_alpha['random'] == 3) {
+                    cum_score_description = 'all random'
                     cum_score_recommendation = 'make it more organized or change pattern'
                     
                  }
-                 else if (counts_alpha['organized'] >= 3) {
-                    cum_score_description = 'mostly organized'
-                    cum_score_recommendation = 'introduce more variability or randomness'
+                 else if (counts_alpha['organized'] == 3) {
+                    cum_score_description = 'all organized'
+                    cum_score_recommendation = 'introduce more variability or repetitiveness'
                  }
-                 else if (counts_alpha['fractal'] >= 3) {
-                    cum_score_description = 'mostly fractal'
+                 else if (counts_alpha['fractal'] == 3) {
+                    cum_score_description = 'all fractal'
                     cum_score_recommendation = 'introduce a change in the pattern or regularlize'
-                    
                  }
-                 else if (counts_alpha['complex'] >= 3) {
-                    cum_score_description = 'mostly complex'
+                 else if (counts_alpha['complex'] == 3) {
+                    cum_score_description = 'all complex'
                     cum_score_recommendation = 'introduce more regularity and make it more mundane'  
                 }
-                else if (counts_alpha['random'] == 2 && counts_alpha['complex'] == 2) {
-                    if ((last_two == 'random' ||  last_two == 'complex')) {
-                        cum_score_description = 'random and complex'
-                        cum_score_recommendation = 'introduce regularity or more variability'  
-                    }
-                    else {
-                        cum_score_description = 'random to complex oscillatory'
-                        cum_score_recommendation = 'introduce regularity and stay with it'
-                    }
+                else if (last_two == 'random') {
+                    cum_score_description = 'becoming random'
+                    cum_score_recommendation = 'keep doing repetitive action'
                 }
-                else if (counts_alpha['random'] == 2 && counts_alpha['fractal'] == 2) {
-                    if ((last_two == 'random' ||  last_two == 'fractal')) {
-                        cum_score_description = 'random and fractal'
-                        cum_score_recommendation = 'introduce regularity or change pattern'  
-                    }
-                    else {
-                        cum_score_description = 'random to fractal oscillatory'
-                        cum_score_recommendation = 'introduce regularity and stay with it'  
-                    }
-                }
-                else if (counts_alpha['random'] == 2 && counts_alpha['organized'] == 2) {
-                    if ((last_two == 'random' ||  last_two == 'organized')) {
-                        cum_score_description = 'random and organized'
-                        cum_score_recommendation = 'introduce variability or change pattern'  
-                    }
-                    else {
-                        cum_score_description = 'random to organized oscillatory'
-                        cum_score_recommendation = 'introduce variability and stay with it'  
-                    }
-                }
-                else if (counts_alpha['fractal'] == 2 && counts_alpha['organized'] == 2) {
-                    if ((last_two == 'fractal' ||  last_two == 'organized')) {
-                        cum_score_description = 'fractal and organized'
-                        cum_score_recommendation = 'increase fractal variability'  
-                    }
-                    else {
-                        cum_score_description = 'fractal to organized oscillatory'
-                        cum_score_recommendation = 'increase fractal variability'  
-                    }
-                }
-                else if (counts_alpha['fractal'] == 2 && counts_alpha['complex'] == 2) {
-                    if ((last_two == 'fractal' ||  last_two == 'complex')) {
-                        cum_score_description = 'fractal and complex'
-                        cum_score_recommendation = 'increase fractal variability'  
-                    }
-                    else {
-                        cum_score_description = 'fractal to complex oscillatory'
-                        cum_score_recommendation = 'stay with the fractal variability'  
-                    }
-                }
-                else if (counts_alpha['organized'] == 2 && counts_alpha['complex'] == 2) {
-                    if ((last_two == 'organized' ||  last_two == 'complex')) {
-                        cum_score_description = 'organized and complex'
-                        cum_score_recommendation = 'increase fractal variability or make repetitive movement'  
-                    }
-                    else {
-                        cum_score_description = 'organized to complex oscillatory'
-                        cum_score_recommendation = 'stay with the organized movement or change pattern'  
-                    }
-                }
-                else if (last_two == 'complex') {
-                    cum_score_description = 'diverse to complex'
-                    cum_score_recommendation = 'keep changing pattern'  
+                else if (first_two == 'random') {
+                    cum_score_description = 'leaving random'
+                    cum_score_recommendation = 'return to repetitive or introduce variability'
                 }
                 else if (last_two == 'organized') {
-                    cum_score_description = 'diverse to organized'
-                    cum_score_recommendation = 'introduce variability or repetitiveness'  
+                    cum_score_description = 'becoming organized'
+                    cum_score_recommendation = 'keep doing a regular action'  
+                }
+                else if (first_two == 'organized') {
+                    cum_score_description = 'leaving organized'
+                    cum_score_recommendation = 'keep doing what you are doing'  
+                }
+                else if (last_two == 'fractal') {
+                    cum_score_description = 'becoming fractal'
+                    cum_score_recommendation = 'stay with the fractal variability'  
+                }
+                else if (first_two == 'fractal') {
+                    cum_score_description = 'leaving fractal'
+                    cum_score_recommendation = 'bring back variability or make it repetitive'  
                 }
                 else if (last_two == 'complex') {
-                    cum_score_description = 'diverse to complex'
-                    cum_score_recommendation = 'keep changing pattern'  
+                    cum_score_description = 'becoming complex'
+                    cum_score_recommendation = 'stay with the changing of pattern'  
                 }
-                else if (last_two == 'random') {
-                    cum_score_description = 'diverse to random'
-                    cum_score_recommendation = 'keep it repetitive'  
+                else if (first_two == 'complex') {
+                    cum_score_description = 'leaving complex'
+                    cum_score_recommendation = 'keep changing pattern or introduce variability'  
+                }
+                else if (counts_alpha['random'] == 2 && last_two != 'random' && first_two != 'random') {
+                    cum_score_description = 'unstable random'
+                    cum_score_recommendation = 'keep doing repetitive, regularize, or change pattern'  
+                }
+                else if (counts_alpha['organized'] == 2 && last_two != 'organized' && first_two != 'organized') {
+                    cum_score_description = 'unstable organized'
+                    cum_score_recommendation = 'introduce variability or highly repetitive action'  
+                }
+                else if (counts_alpha['fractal'] == 2 && last_two != 'fractal' && first_two != 'fractal') {
+                    cum_score_description = 'unstable fractal'
+                    cum_score_recommendation = 'focus on fractal variability'  
+                }
+                else if (counts_alpha['complex'] == 2 && last_two != 'complex' && first_two != 'complex') {
+                    cum_score_description = 'unstable complex'
+                    cum_score_recommendation = 'keep changing pattern'  
                 }
                 else {
                     cum_score_description = 'diverse'
-                    cum_score_recommendation = 'focus on fractal variability or keep the same movement'
+                    cum_score_recommendation = 'focus on fractal variability or keep shifting'
                 }
 
 
@@ -1239,7 +1216,7 @@ function getAlphaType(alpha) {
     else if (alpha > 0.60 && alpha < 0.90) {
        return 'organized'
     }
-    else if (alpha > 0.90 && alpha < 1.10) {
+    else if (alpha >= 0.90 && alpha <= 1.10) {
        return 'fractal'
     }
     else if (alpha > 1.10) {
