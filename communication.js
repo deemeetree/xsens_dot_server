@@ -357,7 +357,7 @@ function setEventHandlerFunctions()
         if (alpha_type == 'random') {
             alpha_info = 'random irregularity'
          }
-         else if (alpha_type == 'organized') {
+         else if (alpha_type == 'regular') {
             alpha_info = 'organized regularity'
          }
          else if (alpha_type == 'fractal') {
@@ -418,9 +418,9 @@ function setEventHandlerFunctions()
             let last_alpha_recommendation = ''
 
             if (cumulative_alpha_type == 'random') {
-                last_alpha_recommendation = 'random irregularity'
+                last_alpha_recommendation = 'random repetitiveness'
              }
-             else if (cumulative_alpha_type == 'organized') {
+             else if (cumulative_alpha_type == 'regular') {
                 last_alpha_recommendation = 'organized regularity'
              }
              else if (cumulative_alpha_type == 'fractal') {
@@ -454,10 +454,10 @@ function setEventHandlerFunctions()
                 let average_alpha_type = getAlphaType(parseFloat(avCumAlpha).toFixed(2))
 
                 if (average_alpha_type == 'random') {
-                    cum_alpha_recommendation = 'make it more organized or change pattern'
+                    cum_alpha_recommendation = 'make it more regular or change pattern'
                     cum_alpha_description = 'random irregularity'
                  }
-                 else if (average_alpha_type == 'organized') {
+                 else if (average_alpha_type == 'regular') {
                     cum_alpha_recommendation = 'introduce more variability or randomness'
                     cum_alpha_description = 'organized regularity'
                  }
@@ -497,12 +497,12 @@ function setEventHandlerFunctions()
                 let cum_score_recommendation = ''
                 
                 if (counts_alpha['random'] == 3) {
-                    cum_score_description = 'all random'
-                    cum_score_recommendation = 'make it more organized or change pattern'
+                    cum_score_description = 'all repetitive'
+                    cum_score_recommendation = 'make it more regular or change pattern'
                     
                  }
-                 else if (counts_alpha['organized'] == 3) {
-                    cum_score_description = 'all organized'
+                 else if (counts_alpha['regular'] == 3) {
+                    cum_score_description = 'all regular'
                     cum_score_recommendation = 'introduce more variability or repetitiveness'
                  }
                  else if (counts_alpha['fractal'] == 3) {
@@ -521,12 +521,12 @@ function setEventHandlerFunctions()
                     cum_score_description = 'leaving random'
                     cum_score_recommendation = 'return to repetitive or introduce variability'
                 }
-                else if (last_two == 'organized') {
-                    cum_score_description = 'becoming organized'
+                else if (last_two == 'regular') {
+                    cum_score_description = 'becoming regular'
                     cum_score_recommendation = 'keep doing a regular action'  
                 }
-                else if (first_two == 'organized') {
-                    cum_score_description = 'leaving organized'
+                else if (first_two == 'regular') {
+                    cum_score_description = 'leaving regular'
                     cum_score_recommendation = 'keep doing what you are doing'  
                 }
                 else if (last_two == 'fractal') {
@@ -549,8 +549,8 @@ function setEventHandlerFunctions()
                     cum_score_description = 'unstable random'
                     cum_score_recommendation = 'keep doing repetitive, regularize, or change pattern'  
                 }
-                else if (counts_alpha['organized'] == 2 && last_two != 'organized' && first_two != 'organized') {
-                    cum_score_description = 'unstable organized'
+                else if (counts_alpha['regular'] == 2 && last_two != 'regular' && first_two != 'regular') {
+                    cum_score_description = 'unstable regular'
                     cum_score_recommendation = 'introduce variability or highly repetitive action'  
                 }
                 else if (counts_alpha['fractal'] == 2 && last_two != 'fractal' && first_two != 'fractal') {
@@ -572,10 +572,10 @@ function setEventHandlerFunctions()
                 parseFloat(avCumAlpha).toFixed(2) + ', ' + 
                 average_alpha_type + ' on average, ' + 
                 cum_alpha_description + '<br>' + 
-                'based on the last averages: ' + cum_alpha_recommendation + '<br><br>' + 
+                'based on the last averages: ' + cum_alpha_recommendation + '<br><br><br>' + 
                 'the last ' + recommenderIterations + ' states have been:<br>' + 
-                cum_alpha_score + ' | ' + cum_score_description + '<br><br>' + 
-                'eightos recommendation: ' + cum_score_recommendation;
+                cum_alpha_score + ' | ' + cum_score_description + '<br><br><br>' + 
+                'eightos recommendation:<br><h4>' + cum_score_recommendation + '</h4>';
 
             }
 
@@ -1214,7 +1214,7 @@ function getAlphaType(alpha) {
        return 'random'
     }
     else if (alpha > 0.60 && alpha < 0.90) {
-       return 'organized'
+       return 'regular'
     }
     else if (alpha >= 0.90 && alpha <= 1.10) {
        return 'fractal'
