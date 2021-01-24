@@ -193,6 +193,11 @@ class FunctionalComponent
             this.globalEventHandler( eventName, parameters );
             return;
         }
+        else 
+        if (eventName == 'eightOSAdvice') {
+            this.globalEventHandler( eventName, parameters );
+            return;
+        }
 
         if ( parameters == undefined ) 
         {

@@ -57,8 +57,8 @@ const RECORDINGS_PATH = "/data/",
 // Activate OSC server
 const OSC = require('osc-js')
 
-let osc_options = { open: { port: 49162, host: 'localhost'} }
-let osc = new OSC({ plugin: new OSC.DatagramPlugin(osc_options) })
+var osc_options = { open: { port: 49162, host: 'localhost'} }
+var osc = new OSC({ plugin: new OSC.DatagramPlugin(osc_options) })
 
 // Activate Python connection
 var spawn = require('child_process').spawn
@@ -106,6 +106,19 @@ var transitions =
             osc_options = { open: { port: parameters.port, host: parameters.host} }
             osc = new OSC({ plugin: new OSC.DatagramPlugin(osc_options) })
             console.log(osc.status())
+
+	    }
+    },
+    {
+		stateName: 'Recording',
+        eventName: 'eightOSAdvice',
+        nextState: 'Recording',
+		
+		transFunc:function( component, parameters )
+	    {
+          
+            console.log('received EightOS advice')
+            console.log(parameters)
 
 	    }
     },

@@ -286,6 +286,10 @@ function setEventHandlerFunctions()
     {
     };
 
+    eventHandlerFunctions[  'eightOSAdvice' ] = function( eventName, parameters  )
+    {
+    };
+
     eventHandlerFunctions[  'sensorDisabled' ] = function( eventName, parameters  )
     {
         removeSensor( measuringSensors, parameters.address );
@@ -574,8 +578,12 @@ function setEventHandlerFunctions()
                 cum_alpha_description + '<br>' + 
                 'based on the last averages: ' + cum_alpha_recommendation + '<br><br><br>' + 
                 'the last ' + recommenderIterations + ' states have been:<br>' + 
-                cum_alpha_score + ' | ' + cum_score_description + '<br><br><br>' + 
+                '<h4>' + cum_alpha_score + ' | ' + cum_score_description + '</h4><br><br>' + 
                 'eightos recommendation:<br><h4>' + cum_score_recommendation + '</h4>';
+
+
+                sendGuiEvent( 'eightOSAdvice', {last_states:cum_score_description,advice:cum_score_recommendation} );
+
 
             }
 
