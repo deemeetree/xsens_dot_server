@@ -67,14 +67,12 @@ var beep = require('beepbeep')
 
 // Define the Python DFA script to be used
 let py = {}
-let py_iterations = 0 
-let should_restart = true
 
 var interval_data = {}
 var interval_dataString = {}
-var interval_iterations = 0
-var first_time = true
+var interval_iterations = {}
 
+let max_iterations = 1200
 
 
 var transitions =
@@ -810,7 +808,7 @@ var transitions =
                     break;
 
                 case MEASURING_PAYLOAD_TYPE_RATE_QUANTITIES_WITH_MAG:
-                    component.fileStream.write( "Timestamp,Address,Acc_x,Acc_y,Acc_z,Gyr_x,Gyr_y,Gyr_z,Mag_x,Mag_y,Mag_z\n" );
+                    component.fileStream.write( "Timestamp,Address,Acc_x,Acc_y,Acc_z,Gyr_x,Gyr_y,Gyr_z,Mag_x,Mag_y,Mag_z,Alpha_Fractal,Alpha_Score\n" );
                     break;
 
                 case MEASURING_PAYLOAD_TYPE_CUSTOM_MODE_1:
@@ -935,7 +933,6 @@ var transitions =
 
             // console.log('Getting Parameters')
             // console.log(parameters)
-            // console.log('Iteration:', interval_iterations)
            
 
             
@@ -961,50 +958,26 @@ var transitions =
              /* Considering we are at 60 Hz we want the DFA check function to load every 20 seconds  
              after the first 40 seconds, so 60 x 40 = 2400 iterations, then 1200 */
 
-             interval_iterations++
+             // Trigger the function on the basis of the number of values in the sensor
 
-             let max_iterations = 1200
+             if (interval_data[parameters.address].length == max_iterations * 2) {
+                  
+                    if (!interval_iterations[parameters.address]) {
+                        interval_iterations[parameters.address] = 1
+                    }
+                    else {
+                        ++interval_iterations[parameters.address]
+                    }
 
-             // If we have more than 1 sensor, we multiply this max by the numeber of sensors
+                    console.log('Firing the Function on Data')
+                    console.log(interval_data)
+                    console.log('Interval Iteration')
+                    console.log(interval_iterations)
+                
+                    // For each sensor, calculate the Fractal signature
 
-             let total_sensors = 1
+                    calculateDFA(parameters.address, interval_data, interval_iterations[parameters.address], max_iterations, component, parameters) 
 
-             if (Object.keys(interval_data).length != 0) {
-                 total_sensors = Object.keys(interval_data).length
-             }
-
-             // Fix it so that we measure whether to trigger based on the number of values in each sensor
-
-             if (interval_iterations == max_iterations * total_sensors) {
-                 
-                     if (!first_time) {
-
-                         console.log('Firing the Function on Data')
-                         console.log(interval_data)
-                        
-                         // For each sensor, calculate the Fractal signature
-
-                         for (let sensor in interval_data) {
-
-
-                            calculateDFA(sensor, interval_data, py_iterations, max_iterations, component) 
-      
-
-                         }
-
-                         py_iterations++
-
-                        
-
-                                        
-                     }
-                     else {
-                         // next time the function will fire
-                         first_time = false
-                     }
-                 
-                     // reset counter
-                     interval_iterations = 0
 
              }
 
@@ -1252,8 +1225,8 @@ function startRecordingToFile( component, name )
 
     interval_data = {}
     interval_dataString = {}
-    interval_iterations = 0
-    first_time = true
+    interval_iterations = {}
+    
 
 }
 
@@ -1263,7 +1236,7 @@ function startRecordingToFile( component, name )
 // -- Calculate chaos signature of the movement --
 // ---------------------------------------------------------------------------------------
 
-function calculateDFA(sensor, interval_data, py_iterations, max_iterations, component) {
+function calculateDFA(sensor, interval_data, py_iterations, max_iterations, component, parameters) {
 
      if (!py[sensor]) {
         py[sensor] = []
@@ -1298,26 +1271,38 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
          console.log('Alpha Component:',parseFloat(interval_dataString[sensor]));
          console.log('based on the array length:', interval_data[sensor].length)
        
+         let alpha_exponent = parseFloat(interval_dataString[sensor])
+         let alpha_score = ''
+         let alpha_note = ''
 
-         if (interval_dataString[sensor] < 0.42) {
+         if (alpha_exponent < 0.42) {
              console.log('negative correlation, mean-reverting')
-             
+             alpha_score = 'random'
+             alpha_note = 'A'
              // beep([0,400,400,1100,1100,400])
          }
-         else if (interval_dataString[sensor] >= 0.42 && interval_dataString[sensor] <= 0.58) {
+         else if (alpha_exponent >= 0.42 && alpha_exponent <= 0.58) {
              console.log('random white noise movement, unpredictable')
+             alpha_score = 'random'
+             alpha_note = 'A'
              // beep(3)
          }
-         else if (interval_dataString[sensor] > 0.58 && interval_dataString[sensor] < 0.90) {
+         else if (alpha_exponent > 0.58 && alpha_exponent < 0.90) {
              console.log('regular, mundane movement, positive feedback')
+             alpha_score = 'regular'
+             alpha_note = 'B'
              // beep([0,1100,1100,400,400,1100])
          }
-         else if (interval_dataString[sensor] > 0.90 && interval_dataString[sensor] < 1.10) {
+         else if (alpha_exponent >= 0.90 && alpha_exponent <= 1.10) {
              console.log('fractal movement, self-similar')
+             alpha_score = 'fractal'
+             alpha_note = 'C'
             //  beep(5)
          }
-         else if (interval_dataString[sensor] > 1.10) {
+         else if (alpha_exponent > 1.10) {
              console.log('organized, highly complex (pathological) movement')
+             alpha_score = 'complex'
+             alpha_note = 'D'
              // beep([0,400,400,400,400,400,400,400])
          }
 
@@ -1330,9 +1315,14 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
          for (let i = 0; i < 20; i++) {
 
             setTimeout(()=>{
-                osc.send(new OSC.Message('/alpha/' + sensor, parseFloat(interval_dataString[sensor])), {port: osc_options.open.port, host: osc_options.open.host})
+                osc.send(new OSC.Message('/alpha/' + sensor, alpha_exponent), {port: osc_options.open.port, host: osc_options.open.host})
             },50*i)
 
+            setTimeout(()=>{
+                osc.send(new OSC.Message('/alpha_note/' + sensor, alpha_note), {port: osc_options.open.port, host: osc_options.open.host})
+            },50*i)
+            
+            // TODO maybe move that
             if (i == 19) {
                 setTimeout(()=>{
                     interval_dataString[sensor] = ''
@@ -1341,7 +1331,16 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
          }
 
          // Send a global event to inform the UI about the alpha
-         component.gui.sendGuiEvent( 'alphaCalculated', {sensor: sensor, alpha: interval_dataString[sensor]} );
+         component.gui.sendGuiEvent( 'alphaCalculated', {sensor: sensor, alpha: alpha_exponent} );
+
+
+         // Add alpha to the CSV
+        
+         parameters['Alpha_Fractal'] = alpha_exponent
+         parameters['Alpha_Score'] = alpha_score
+
+         component.csvBuffer += Object.values(parameters).join() + '\n';
+
 
      });
 
