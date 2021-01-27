@@ -185,19 +185,25 @@ TO RUN THE APPLICATION
 There are *4 states* of the Alpha possible. The value (usually ~0.3 to 1.5 max) is sent to the OSC `/alpha/sensor_id` channel every 30 seconds, where `sensor_id` is the ID of the channel.
 
 1. alpha <= 0.60
+
 Repetitive, Random Movement (0/1, up/down, left/right).
+
 Also when the sensors are on the table, not moving
 
 
-2. alpha > 0.60 && alpha < 0.90
-Regular movement (e.g. standard dancing, doing stuff, walking).
-Most of the time we are here
+1. alpha > 0.60 && alpha < 0.90
+  
+  Regular movement (e.g. standard dancing, doing stuff, walking).
+  
+  Most of the time we are here
 
 3. alpha >= 0.90 && alpha <= 1.10
-Fractal movement — this is what we're looking for - variative movement, butoh, adaptive movement.
+  
+  Fractal movement — this is what we're looking for - variative movement, butoh, adaptive movement.
 
 4. alpha > 1.10
-Complex movements with phase shifts — changing patterns of movement.
+  
+  Complex movements with phase shifts — changing patterns of movement.
 
 This same signal also sends the state via the OSC `/alpha_note/sensor_id` channel. A for random (1), B for regular (2), C for fractal (3), D for complex (4)
 
