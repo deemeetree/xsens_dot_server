@@ -182,30 +182,27 @@ TO RUN THE APPLICATION
 
 ## Alpha Values
 
-There are *4 states* of the Alpha possible. The value (usually ~0.3 to 1.5 max) is sent to the OSC `/alpha/sensor_id` channel every 30 seconds, where `sensor_id` is the ID of the channel.
+There are *4 states* of the Alpha possible. They are calculated for each separate sensor and for all the sensors at the same time every 30 seconds. 
 
-1. alpha <= 0.60
+The value (usually ~0.3 to 1.5 max) is sent to the OSC `/alpha/sensor_id` channel every 30 seconds, where `sensor_id` is the ID of the sensor.
 
-Repetitive, Random Movement (0/1, up/down, left/right).
+1. alpha <= 0.60 (A)
+Repetitive, Random Movement (0/1, up/down, left/right). Also when the sensors are on the table, not moving
 
-Also when the sensors are on the table, not moving
+2. alpha > 0.60 && alpha < 0.90 (B)
+Regular movement (e.g. standard dancing, doing stuff, walking). Most of the time we are here
 
+3. alpha >= 0.90 && alpha <= 1.10 (C)
+Fractal movement — this is what we're looking for - variative movement, butoh, adaptive movement.
 
-1. alpha > 0.60 && alpha < 0.90
-  
-  Regular movement (e.g. standard dancing, doing stuff, walking).
-  
-  Most of the time we are here
+4. alpha > 1.10 (D)
+Complex movements with phase shifts — changing patterns of movement.
 
-3. alpha >= 0.90 && alpha <= 1.10
-  
-  Fractal movement — this is what we're looking for - variative movement, butoh, adaptive movement.
-
-4. alpha > 1.10
-  
-  Complex movements with phase shifts — changing patterns of movement.
+--
 
 This same signal also sends the state via the OSC `/alpha_note/sensor_id` channel. A for random (1), B for regular (2), C for fractal (3), D for complex (4)
+
+--
 
 Also, all the sensors have a cumulative alpha for the last 2 minutes, which is also updated. This total alpha is sent to another channel `/alpha_all/` (the Alpha index) and `/alpha_all_note/` (the A, B, C or D state).
 
