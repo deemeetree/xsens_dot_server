@@ -206,7 +206,9 @@ This same signal also sends the state via the OSC `/alpha_note/sensor_id` channe
 
 Also, all the sensors have a cumulative alpha for the last 2 minutes, which is also updated. This total alpha is sent to another channel `/alpha_all/` (the Alpha index) and `/alpha_all_note/` (the A, B, C or D state).
 
- 
+--
+
+-- 
  
 
 ## Known issues
