@@ -8,28 +8,6 @@ The Alpha exponent at around 0.5 indicates random walk (sensor in an idle state)
 In EightOS we aim to go through various Alpha exponents in a movement session, so that both the individuals and the group can experience all the different states (randomness, positive correlation, fractality, and disruption). It relates to the variability principle described on [EightOS.IO](https://8os.io) in more detail. 
 
 
-## Alpha Values
-
-There are *4 states* of the Alpha possible. The value (usually ~0.3 to 1.5 max) is sent to the OSC `/alpha/sensor_id` channel every 30 seconds, where `sensor_id` is the ID of the channel.
-
-1. alpha <= 0.60
-Repetitive, Random Movement (0/1, up/down, left/right).
-Also when the sensors are on the table, not moving
-
-
-2. alpha > 0.60 && alpha < 0.90
-Regular movement (e.g. standard dancing, doing stuff, walking).
-Most of the time we are here
-
-3. alpha >= 0.90 && alpha <= 1.10
-Fractal movement — this is what we're looking for - variative movement, butoh, adaptive movement.
-
-4. alpha > 1.10
-Complex movements with phase shifts — changing patterns of movement.
-
-This same signal also sends the state via the OSC `/alpha_note/sensor_id` channel. A for random (1), B for regular (2), C for fractal (3), D for complex (4)
-
-Also, all the sensors have a cumulative alpha for the last 2 minutes, which is also updated. This total alpha is sent to another channel `/alpha_all/` (the Alpha index) and `/alpha_all_note/` (the A, B, C or D state).
 
 
 ## XSens Overview
@@ -202,6 +180,31 @@ TO RUN THE APPLICATION
 7. Click `Start Streaming`
 
 
+## Alpha Values
+
+There are *4 states* of the Alpha possible. The value (usually ~0.3 to 1.5 max) is sent to the OSC `/alpha/sensor_id` channel every 30 seconds, where `sensor_id` is the ID of the channel.
+
+1. alpha <= 0.60
+Repetitive, Random Movement (0/1, up/down, left/right).
+Also when the sensors are on the table, not moving
+
+
+2. alpha > 0.60 && alpha < 0.90
+Regular movement (e.g. standard dancing, doing stuff, walking).
+Most of the time we are here
+
+3. alpha >= 0.90 && alpha <= 1.10
+Fractal movement — this is what we're looking for - variative movement, butoh, adaptive movement.
+
+4. alpha > 1.10
+Complex movements with phase shifts — changing patterns of movement.
+
+This same signal also sends the state via the OSC `/alpha_note/sensor_id` channel. A for random (1), B for regular (2), C for fractal (3), D for complex (4)
+
+Also, all the sensors have a cumulative alpha for the last 2 minutes, which is also updated. This total alpha is sent to another channel `/alpha_all/` (the Alpha index) and `/alpha_all_note/` (the A, B, C or D state).
+
+ 
+ 
 
 ## Known issues
 1. [Connection] Unable to connect sensors in Mac with Bluetooth 5.0.
