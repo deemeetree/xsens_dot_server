@@ -7,6 +7,31 @@ The Alpha exponent at around 0.5 indicates random walk (sensor in an idle state)
 
 In EightOS we aim to go through various Alpha exponents in a movement session, so that both the individuals and the group can experience all the different states (randomness, positive correlation, fractality, and disruption). It relates to the variability principle described on [EightOS.IO](https://8os.io) in more detail. 
 
+
+## Alpha Values
+
+There are *4 states* of the Alpha possible. The value (usually ~0.3 to 1.5 max) is sent to the OSC `/alpha/sensor_id` channel every 30 seconds, where `sensor_id` is the ID of the channel.
+
+1. alpha <= 0.60
+Repetitive, Random Movement (0/1, up/down, left/right).
+Also when the sensors are on the table, not moving
+
+
+2. alpha > 0.60 && alpha < 0.90
+Regular movement (e.g. standard dancing, doing stuff, walking).
+Most of the time we are here
+
+3. alpha >= 0.90 && alpha <= 1.10
+Fractal movement — this is what we're looking for - variative movement, butoh, adaptive movement.
+
+4. alpha > 1.10
+Complex movements with phase shifts — changing patterns of movement.
+
+This same signal also sends the state via the OSC `/alpha_note/sensor_id` channel. A for random (1), B for regular (2), C for fractal (3), D for complex (4)
+
+Also, all the sensors have a cumulative alpha for the last 2 minutes, which is also updated. This total alpha is sent to another channel `/alpha_all/` (the Alpha index) and `/alpha_all_note/` (the A, B, C or D state).
+
+
 ## XSens Overview
 Xsens DOT Server is a simple web server that can scan, connect and start measurement with Xsens DOT on Windows, macOS and Raspberry Pi. The system is built using Node.js in combination with [Noble](https://github.com/abandonware/noble). 
 
@@ -113,30 +138,70 @@ Get more information about Xsens DOT in [Develepor Page](https://www.xsens.com/d
 
 ## Run Xsens DOT Server
 
-The steps below should only be performed once
+===
+BEFORE YOU RUN IT FOR THE FIRST TIME
+===
+
+0. Open Terminal
 
 1. Clone repository
    ```sh
    git clone https://github.com/deemeetree/xsens_dot_server.git
    ```
-2. Enter Xsens DOT Server project `cd ./xsens_dot_server` and install the dependency package `npm install`
-3. Install conda (python package management) and activate the correct environment
+2. Enter Xsens DOT Server project `cd ./xsens_dot_server` 
+   
+3. Install the dependency packages `npm install`
+   
+4. Install the required Python packages using Conda (python package management) or directly:
+
+a. If you're doing it on a Mac or Windows, go to the https://www.anaconda.com/products/individual and download it to your computer and follow the installation instructions
+
+b. On Raspberry P you have two ways: b.1 — [APT-GET](https://stackoverflow.com/questions/52240336/conda-problem-on-rp3-could-not-find-some-dependencies-for-package-blas-op) or b.2 — [MINICONDA](https://stackoverflow.com/questions/39371772/how-to-install-anaconda-on-raspberry-pi-3-model-b). The `apt-get` way is easier. You just have to do:
+
+```
+sudo apt-get install python-numpy python-scipy python-pandas python-matplotlib
+```
+
+5. If you used Conda or Miniconda, activate the correct environment:
    ```
-   conda create -n eightos numpy matplotlib scipy
+   conda create -n eightos numpy pandas matplotlib scipy
    ```
    then 
    ```
    conda activate eightos
    ```
 
-If the current conda (python) environment is set to eightos, the below should work fine:
+If the current conda (python) environment is set to eightos OR if you installed the Python packages via `apt-get`, you can now run the application
 
-4. Run Xsens DOT Server
+===
+TO RUN THE APPLICATION
+===
+
+0. Make sure you are in the Terminal or open it on your computer.
+
+1. Make sure you are in the `xsens-dot-server` folder. If not, go to that folder:
+   ```
+   cd xsens-dot-server
+   ```
+
+2. Run Xsens DOT Server
    * Windows and macOS: `node xsensDotServer`
    * Raspberry Pi: `sudo node xsensDotServer`
   
-5. Open Xsens DOT server in browser
-   * Run http://localhost:8080/ or http://127.0.0.1:8080/ you are able to use Xsens DOT Server!
+   If everything is good, the Terminal will show you the host address for the application
+  
+3. Open Xsens DOT server in browser
+   * Run http://localhost:8080/ or http://127.0.0.1:8080/ you are able to use Xsens DOT Server
+
+4. Map OSC port as necessary (port / host)
+
+5. Click `Start Scanning`
+
+6. Connect to the Sensors
+
+7. Click `Start Streaming`
+
+
 
 ## Known issues
 1. [Connection] Unable to connect sensors in Mac with Bluetooth 5.0.
