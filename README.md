@@ -117,7 +117,7 @@ The steps below should only be performed once
 
 1. Clone repository
    ```sh
-   git clone https://github.com/xsens/xsens_dot_server.git
+   git clone https://github.com/deemeetree/xsens_dot_server.git
    ```
 2. Enter Xsens DOT Server project `cd ./xsens_dot_server` and install the dependency package `npm install`
 3. Install conda (python package management) and activate the correct environment
