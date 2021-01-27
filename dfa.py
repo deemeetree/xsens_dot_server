@@ -7,7 +7,6 @@ import pandas as pd
 # author: Dominik Krzeminski (dokato)
 
 import numpy as np
-import matplotlib.pyplot as plt
 import scipy.signal as ss
 
 # detrended fluctuation analysis
@@ -97,15 +96,7 @@ def dfa(x, scale_lim=[5,9], scale_dens=0.25, show=False):
   # fitting a line to rms data
   coeff = np.polyfit(np.log2(scales), np.log2(fluct), 1)
   # print(fluct)
-  if show:
-    fluctfit = 2**np.polyval(coeff,np.log2(scales))
-    plt.loglog(scales, fluct, 'bo')
-    plt.loglog(scales, fluctfit, 'r', label=r'$\alpha$ = %0.2f'%coeff[0])
-    plt.title('DFA')
-    plt.xlabel(r'$\log_{10}$(time window)')
-    plt.ylabel(r'$\log_{10}$<F(t)>')
-    plt.legend()
-    plt.show()
+
   return scales, fluct, coeff[0]
 
 def main():
