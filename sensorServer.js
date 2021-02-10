@@ -111,18 +111,79 @@ var transitions =
     },
     {
 		stateName: 'Recording',
+        eventName: 'averageAlpha',
+        nextState: 'Recording',
+		
+		transFunc:function( component, parameters )
+	    {
+             
+         let alpha_exponent = parseFloat(parameters.alpha)
+         let alpha_score = ''
+         let alpha_note = ''
+         let alpha_result = {}
+
+         alpha_result = getAlphaType(alpha_exponent)
+
+         alpha_score = alpha_result['score']
+         alpha_note = alpha_result['note']
+
+        // Display the symbol
+         console.log(' ')
+         console.log(' ')
+         console.log('~~~~~~[ALL LAST AVERAGE]~~~~~~~')
+         generateConsoleSymbol('AVRG', alpha_exponent, alpha_score)
+         console.log('~~~~~~~~[END AVERAGE]~~~~~~~~~~')
+         console.log(' ')
+         console.log(' ')
+        // DEBUG values
+        //  console.log('Sensor:',sensor);
+        //  console.log('Alpha Component:',alpha_exponent);
+
+         sendAlphaViaOSC('alpha_avrg', 'all', alpha_exponent, alpha_note)
+
+	    }
+    },
+    {
+		stateName: 'Recording',
         eventName: 'eightOSAdvice',
         nextState: 'Recording',
 		
 		transFunc:function( component, parameters )
 	    {
           
-            console.log('\n\n')
-            console.log('=============================================')
-            console.log('received EightOS advice')
-            console.log(parameters)
-            console.log('=============================================')
-            console.log('\n\n')
+            let alpha_exponent = parseFloat(parameters.alpha)
+            let alpha_score = ''
+            let alpha_note = ''
+            let alpha_state = ''
+            let alpha_result = {}
+   
+            alpha_result = getAlphaType(alpha_exponent)
+            
+            // this is for the image
+            alpha_score = alpha_result['score']
+
+            // this is for the OSC and Text
+            alpha_note = parameters.note
+            alpha_advice = parameters.advice
+            alpha_state = parameters.state
+   
+           // Display the symbol
+            console.log(' ')
+            console.log(' ')
+            console.log('++++++[ALL HISTORICAL]++++++')
+            generateConsoleSymbol('HIST', alpha_exponent, alpha_score)
+            console.log(' ')
+            console.log('state: ' + alpha_state)
+            console.log('advice: ' + alpha_advice)
+            console.log(' ')
+            console.log('++++++[END HISTORICAL]++++++')
+            console.log(' ')
+            console.log(' ')
+           // DEBUG values
+           //  console.log('Sensor:',sensor);
+           //  console.log('Alpha Component:',alpha_exponent);
+   
+            sendAlphaViaOSC('alpha_history', 'all', alpha_exponent, alpha_note)
 
 	    }
     },
@@ -825,7 +886,7 @@ var transitions =
                     break;
 
                 case MEASURING_PAYLOAD_TYPE_RATE_QUANTITIES_WITH_MAG:
-                    component.fileStream.write( "Timestamp,Address,Acc_x,Acc_y,Acc_z,Gyr_x,Gyr_y,Gyr_z,Mag_x,Mag_y,Mag_z,Alpha_Fractal,Alpha_Score\n" );
+                    component.fileStream.write( "Timestamp,Address,Acc_x,Acc_y,Acc_z,Gyr_x,Gyr_y,Gyr_z,Mag_x,Mag_y,Mag_z,acc_sum,Alpha_Fractal,Alpha_Score\n" );
                     break;
 
                 case MEASURING_PAYLOAD_TYPE_CUSTOM_MODE_1:
@@ -952,24 +1013,27 @@ var transitions =
             // console.log(parameters)
            
 
-            
+            let acc_sum = (Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3
 
             if (!interval_data[parameters.address]) {
                 interval_data[parameters.address] = []
             }
             else {
-                interval_data[parameters.address].push((Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3)
+                interval_data[parameters.address].push(acc_sum)
             }
+
+            parameters['acc_sum'] = acc_sum
             
             osc.send(new OSC.Message('/acc_x/' + parameters.address, parameters.acc_x), {port: osc_options.open.port, host: osc_options.open.host})
             osc.send(new OSC.Message('/acc_y/' + parameters.address, parameters.acc_y), {port: osc_options.open.port, host: osc_options.open.host})
             osc.send(new OSC.Message('/acc_z/' + parameters.address, parameters.acc_z), {port: osc_options.open.port, host: osc_options.open.host})
+            osc.send(new OSC.Message('/acc_sum/' + parameters.address, parameters.acc_sum), {port: osc_options.open.port, host: osc_options.open.host})
             osc.send(new OSC.Message('/gyr_x/' + parameters.address, parameters.gyr_x), {port: osc_options.open.port, host: osc_options.open.host})
             osc.send(new OSC.Message('/gyr_y/' + parameters.address, parameters.gyr_y), {port: osc_options.open.port, host: osc_options.open.host})
             osc.send(new OSC.Message('/gyr_z/' + parameters.address, parameters.gyr_z), {port: osc_options.open.port, host: osc_options.open.host})
-            osc.send(new OSC.Message('/mag_x/' + parameters.address, parameters.mag_x), {port: osc_options.open.port, host: osc_options.open.host})
-            osc.send(new OSC.Message('/mag_y/' + parameters.address, parameters.mag_y), {port: osc_options.open.port, host: osc_options.open.host})
-            osc.send(new OSC.Message('/mag_z/' + parameters.address, parameters.mag_z), {port: osc_options.open.port, host: osc_options.open.host})
+            // osc.send(new OSC.Message('/mag_x/' + parameters.address, parameters.mag_x), {port: osc_options.open.port, host: osc_options.open.host})
+            // osc.send(new OSC.Message('/mag_y/' + parameters.address, parameters.mag_y), {port: osc_options.open.port, host: osc_options.open.host})
+            // osc.send(new OSC.Message('/mag_z/' + parameters.address, parameters.mag_z), {port: osc_options.open.port, host: osc_options.open.host})
 
             
              /* Considering we are at 60 Hz we want the DFA check function to load every 20 seconds  
@@ -998,6 +1062,7 @@ var transitions =
 
 
              }
+
 
             component.csvBuffer += Object.values(parameters).join() + '\n';
 
@@ -1290,40 +1355,12 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
          let alpha_exponent = parseFloat(interval_dataString[sensor])
          let alpha_score = ''
          let alpha_note = ''
+         let alpha_result = {}
 
+         alpha_result = getAlphaType(alpha_exponent)
 
-        // Which data to send?
-         if (alpha_exponent < 0.42) {
-            // console.log('negative correlation, mean-reverting')
-             alpha_score = 'random'
-             alpha_note = 'A'
-
-             // beep([0,400,400,1100,1100,400])
-         }
-         else if (alpha_exponent >= 0.42 && alpha_exponent <= 0.58) {
-            // console.log('random white noise movement, unpredictable')
-             alpha_score = 'random' 
-             alpha_note = 'A'
-             // beep(3)
-         }
-         else if (alpha_exponent > 0.58 && alpha_exponent < 0.90) {
-            // console.log('regular, mundane movement, positive feedback')
-             alpha_score = 'regular'
-             alpha_note = 'B'
-             // beep([0,1100,1100,400,400,1100])
-         }
-         else if (alpha_exponent >= 0.90 && alpha_exponent <= 1.10) {
-            // console.log('fractal movement, self-similar')
-             alpha_score = 'fractal'
-             alpha_note = 'C'
-            //  beep(5)
-         }
-         else if (alpha_exponent > 1.10) {
-          //   console.log('organized, highly complex (pathological) movement')
-             alpha_score = 'complex'
-             alpha_note = 'D'
-             // beep([0,400,400,400,400,400,400,400])
-         }
+         alpha_score = alpha_result['score']
+         alpha_note = alpha_result['note']
 
         // Display the symbol
          generateConsoleSymbol(sensor, interval_dataString[sensor], alpha_score)
@@ -1338,27 +1375,10 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
 
          interval_data[sensor] = interval_data[sensor].filter((_, i) => i >= max_iterations)
 
-         for (let i = 0; i < 20; i++) {
-
-            setTimeout(()=>{
-                osc.send(new OSC.Message('/alpha/' + sensor, alpha_exponent), {port: osc_options.open.port, host: osc_options.open.host})
-            },50*i)
-
-            setTimeout(()=>{
-                osc.send(new OSC.Message('/alpha_note/' + sensor, alpha_note), {port: osc_options.open.port, host: osc_options.open.host})
-            },50*i)
-            
-            // TODO maybe move that
-            if (i == 19) {
-                setTimeout(()=>{
-                    interval_dataString[sensor] = ''
-                },2000)
-            }
-         }
+         sendAlphaViaOSC('alpha', sensor, alpha_exponent, alpha_note)
 
          // Send a global event to inform the UI about the alpha
          component.gui.sendGuiEvent( 'alphaCalculated', {sensor: sensor, alpha: alpha_exponent} );
-
 
          // Add alpha to the CSV
         
@@ -1366,6 +1386,13 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
          parameters['Alpha_Score'] = alpha_score
 
          component.csvBuffer += Object.values(parameters).join() + '\n';
+
+          // TODO maybe move that
+            //   if (i == 19) {
+            //     setTimeout(()=>{
+            //         interval_dataString[sensor] = ''
+            //     },2000)
+            // }
 
 
      });
@@ -1379,14 +1406,67 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
 
 }
 
+// ---------------------------------------------------------------------------------------
+// -- Send Alpha via OSC  --
+// ---------------------------------------------------------------------------------------
+
+
+function sendAlphaViaOSC(message, sensor, alpha_exponent, alpha_note) {
+
+    for (let i = 0; i < 20; i++) {
+
+        setTimeout(()=>{
+            osc.send(new OSC.Message('/' + message + '/' + sensor, alpha_exponent), {port: osc_options.open.port, host: osc_options.open.host})
+        },50*i)
+
+        setTimeout(()=>{
+            osc.send(new OSC.Message('/' + message + '_note/' + sensor, alpha_note), {port: osc_options.open.port, host: osc_options.open.host})
+        },50*i)
+       
+     }
+}
+
+
 
 // ---------------------------------------------------------------------------------------
-// -- Calculate chaos signature of the movement --
+// -- Calculate the alpha type  --
 // ---------------------------------------------------------------------------------------
 
-function generateConsoleSymbol(sensor_code,alpha_exp, state) {
 
-    let a = "[" + sensor_code.slice(-2) + "]"
+function getAlphaType(alpha) {
+
+    if (alpha < 0.42) {
+        return {score:'random', note: 'A'}
+    }
+    else if (alpha >= 0.42 && alpha <= 0.60) {
+        return  {score:'random', note: 'A'}
+    }
+    else if (alpha > 0.60 && alpha < 0.90) {
+       return  {score:'regular', note: 'B'}
+    }
+    else if (alpha >= 0.90 && alpha <= 1.10) {
+       return {score:'fractal', note: 'C'}
+    }
+    else if (alpha > 1.10) {
+       return {score:'complex', note: 'D'}
+    }
+}
+
+// ---------------------------------------------------------------------------------------
+// -- Display the current state symbol --
+// ---------------------------------------------------------------------------------------
+
+function generateConsoleSymbol(sensor_code, alpha_exp, state) {
+
+    let a = ''
+    
+    if (sensor_code == 'AVRG' || sensor_code == 'HIST') {
+        a = sensor_code
+    }
+    else {
+        a = "[" + sensor_code.slice(-2) + "]"
+    }
+    
     let b = "α:" + parseFloat(alpha_exp).toFixed(2)
     let c = ""
 
@@ -1409,7 +1489,7 @@ function generateConsoleSymbol(sensor_code,alpha_exp, state) {
         
     }
     else if (state == 'regular') {
-        c = 'variable'
+        c = 'regular'
              alpha_sign = "\
              ╟█           \n\
           " + c + "       \n\

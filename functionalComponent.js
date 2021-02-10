@@ -198,6 +198,13 @@ class FunctionalComponent
             this.globalEventHandler( eventName, parameters );
             return;
         }
+        else 
+        if (eventName == 'averageAlpha') {
+            this.globalEventHandler( eventName, parameters );
+            return;
+        }
+        
+
 
         if ( parameters == undefined ) 
         {

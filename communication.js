@@ -89,6 +89,7 @@ var alphaScore = {}
 var cumulativeAlphaTimeline = []
 var cumulativeAlphaScore = []
 let recommenderIterations = 3 
+let triggered_length = 0
 
 
 
@@ -291,6 +292,10 @@ function setEventHandlerFunctions()
     {
     };
 
+    eventHandlerFunctions[  'averageAlpha' ] = function( eventName, parameters  )
+    {
+    };
+
     eventHandlerFunctions[  'sensorDisabled' ] = function( eventName, parameters  )
     {
         removeSensor( measuringSensors, parameters.address );
@@ -426,10 +431,19 @@ function setEventHandlerFunctions()
         // console.log('sensors_num', sensors_num)
         // console.log('current_length', current_length)
 
-        if ((cumulative_length / sensors_num) == current_length) {
 
+
+        // launch this every time we have passed at least N(number of sensors) updates
+        // so 1 each or if only one then at least a few iterations of the other ones ahead
+
+        // TODO deal with the situation where a sensor may be switched off and then turned back on again
+
+        if ((cumulative_length - triggered_length) == sensors_num) {
+
+            // Set the number of data points at the point of this update
+            triggered_length = cumulative_length 
+            
             // Push the last alpha of each sensor in the last_alphas array
-
             for (let s in alphaTimeline) {
                 last_alphas.push(alphaTimeline[s].slice(-1).pop())
             }
@@ -446,25 +460,20 @@ function setEventHandlerFunctions()
             // console.log('last_alphas.length', last_alphas.length)
     
             // Calculate the average alpha exponent across all the sensors
-
             average_alpha = total_alpha / last_alphas.length
     
             // console.log('average_alpha',average_alpha)
 
             // Add this average alpha to the array
-
             cumulativeAlphaTimeline.push(average_alpha)
 
             // Get the type of the alpha 
-
             let cumulative_alpha_type = getAlphaType(parseFloat(average_alpha).toFixed(2))
 
             // Add this alpha to the cumulative alpha type array 
-
             cumulativeAlphaScore.push(cumulative_alpha_type)
 
             // Display this in the doc
-
             document.getElementById('alphaConsole').innerHTML = cumulativeAlphaScore.join(' → ')
 
             let last_alpha_recommendation = ''
@@ -482,10 +491,13 @@ function setEventHandlerFunctions()
                 last_alpha_recommendation = 'complex phase-shifting'
             }
 
+            // Update HTML
             document.getElementById('lastAverageAlpha').innerHTML = 'current average alpha for all sensors: ' + parseFloat(average_alpha).toFixed(2) + ', ' + last_alpha_recommendation
 
-            // Let us now cut the last N values from the cumulative alpha exponent and type
+            // Send to the server, so that we send the OSC
+            sendGuiEvent( 'averageAlpha', {alpha: parseFloat(average_alpha).toFixed(2), alpha_score: cumulative_alpha_type, description: last_alpha_recommendation } );
 
+            // Let us now cut the last N values from the cumulative alpha exponent and type
             let cumAlpha = cumulativeAlphaTimeline.slice(-recommenderIterations)
 
             let cumScore = cumulativeAlphaScore.slice(-recommenderIterations)
@@ -528,101 +540,22 @@ function setEventHandlerFunctions()
                     cum_alpha_description = 'complex phase-shifting'
                 }
 
+               
+                // For HTML output
+                let cum_alpha_score = cumScore.join(' → ')
 
                 // let's now see what has been the last cumulative average score
 
-                let cum_alpha_score = cumScore.join(' → ')
-                let counts_alpha = {}
-                let last_two = ''
-                let first_two = ''
-
-                for (var i = 0; i < cumScore.length; i++) {
-                    var val = cumScore[i];
-                    counts_alpha[val] = counts_alpha[val] ? counts_alpha[val] + 1 : 1;
-                    if (i == 0) {
-                        if (cumScore[i] == cumScore[i+1]) {
-                            first_two = cumScore[i]
-                        }
-                    }
-                    if (i == cumScore.length - 1) {
-                        if (cumScore[i] == cumScore[i-1]) {
-                            last_two = cumScore[i]
-                        }
-                    }
-                }
-
                 let cum_score_description = ''
                 let cum_score_recommendation = ''
+                let cum_note = ''
+
                 
-                if (counts_alpha['random'] == 3) {
-                    cum_score_description = 'all uniform'
-                    cum_score_recommendation = 'make it more regular or change pattern'
-                    
-                 }
-                 else if (counts_alpha['regular'] == 3) {
-                    cum_score_description = 'all regular'
-                    cum_score_recommendation = 'introduce more fractality or uniformity'
-                 }
-                 else if (counts_alpha['fractal'] == 3) {
-                    cum_score_description = 'all fractal'
-                    cum_score_recommendation = 'introduce a change in the pattern or uniformity'
-                 }
-                 else if (counts_alpha['complex'] == 3) {
-                    cum_score_description = 'all complex'
-                    cum_score_recommendation = 'introduce more uniformity or fractality'  
-                }
-                else if (last_two == 'random') {
-                    cum_score_description = 'becoming uniform'
-                    cum_score_recommendation = 'keep doing uniform action'
-                }
-                else if (first_two == 'random') {
-                    cum_score_description = 'leaving uniform'
-                    cum_score_recommendation = 'return to repetitive or introduce variability'
-                }
-                else if (last_two == 'regular') {
-                    cum_score_description = 'becoming regular'
-                    cum_score_recommendation = 'keep doing a regular action'  
-                }
-                else if (first_two == 'regular') {
-                    cum_score_description = 'leaving regular'
-                    cum_score_recommendation = 'keep doing what you are doing'  
-                }
-                else if (last_two == 'fractal') {
-                    cum_score_description = 'becoming fractal'
-                    cum_score_recommendation = 'stay with the fractal variability'  
-                }
-                else if (first_two == 'fractal') {
-                    cum_score_description = 'leaving fractal'
-                    cum_score_recommendation = 'bring back variability or make it repetitive'  
-                }
-                else if (last_two == 'complex') {
-                    cum_score_description = 'becoming complex'
-                    cum_score_recommendation = 'stay with the changing of pattern'  
-                }
-                else if (first_two == 'complex') {
-                    cum_score_description = 'leaving complex'
-                    cum_score_recommendation = 'keep changing pattern or introduce variability'  
-                }
-                else if (counts_alpha['random'] == 2 && last_two != 'random' && first_two != 'random') {
-                    cum_score_description = 'unstable random'
-                    cum_score_recommendation = 'keep doing repetitive, regularize, or change pattern'  
-                }
-                else if (counts_alpha['regular'] == 2 && last_two != 'regular' && first_two != 'regular') {
-                    cum_score_description = 'unstable regular'
-                    cum_score_recommendation = 'introduce variability or highly repetitive action'  
-                }
-                else if (counts_alpha['fractal'] == 2 && last_two != 'fractal' && first_two != 'fractal') {
-                    cum_score_description = 'unstable fractal'
-                    cum_score_recommendation = 'focus on fractal variability'  
-                }
-                else if (counts_alpha['complex'] == 2 && last_two != 'complex' && first_two != 'complex') {
-                    cum_score_description = 'unstable complex'
-                    cum_score_recommendation = 'keep changing pattern'  
-                }
-                else {
-                    cum_score_description = 'diverse'
-                    cum_score_recommendation = 'focus on fractal variability or keep shifting'
-                }
+                let alpha_all_historic = getHistoricAlphaType(cumScore) 
+
+                cum_score_description = alpha_all_historic.description
+                cum_score_recommendation = alpha_all_historic.recommendation
+                cum_note = alpha_all_historic.note
 
 
                 document.getElementById('alphaRecommendation').innerHTML = 
@@ -636,7 +569,7 @@ function setEventHandlerFunctions()
                 'eightos recommendation:<br><h4>' + cum_score_recommendation + '</h4>';
 
 
-                sendGuiEvent( 'eightOSAdvice', {last_states:cum_score_description,advice:cum_score_recommendation} );
+                sendGuiEvent( 'eightOSAdvice', {alpha: parseFloat(avCumAlpha).toFixed(2), note: cum_note, state: cum_score_description, advice: cum_score_recommendation } );
 
 
             }
@@ -1283,6 +1216,128 @@ function getAlphaType(alpha) {
     }
     else if (alpha > 1.10) {
        return 'complex'
+    }
+}
+
+function getHistoricAlphaType(cumScore) {
+
+    let cum_score_description = ''
+    let cum_score_recommendation = ''
+    let cum_note = ''
+
+    
+    let counts_alpha = {}
+    let last_two = ''
+    let first_two = ''
+
+    for (var i = 0; i < cumScore.length; i++) {
+        var val = cumScore[i];
+        counts_alpha[val] = counts_alpha[val] ? counts_alpha[val] + 1 : 1;
+        if (i == 0) {
+            if (cumScore[i] == cumScore[i+1]) {
+                first_two = cumScore[i]
+            }
+        }
+        if (i == cumScore.length - 1) {
+            if (cumScore[i] == cumScore[i-1]) {
+                last_two = cumScore[i]
+            }
+        }
+    }
+
+
+    
+    if (counts_alpha['random'] == 3) {
+        cum_score_description = 'all uniform'
+        cum_score_recommendation = 'make it more regular or change pattern'
+        cum_note = 'E'
+        
+     }
+     else if (counts_alpha['regular'] == 3) {
+        cum_score_description = 'all regular'
+        cum_score_recommendation = 'introduce more fractality or uniformity'
+        cum_note = 'F'
+     }
+     else if (counts_alpha['fractal'] == 3) {
+        cum_score_description = 'all fractal'
+        cum_score_recommendation = 'introduce a change in the pattern or uniformity'
+        cum_note = 'G'
+     }
+     else if (counts_alpha['complex'] == 3) {
+        cum_score_description = 'all complex'
+        cum_score_recommendation = 'introduce more uniformity or fractality'  
+        cum_note = 'H'
+    }
+    else if (last_two == 'random') {
+        cum_score_description = 'becoming uniform'
+        cum_score_recommendation = 'keep doing uniform action'
+        cum_note = 'I'
+    }
+    else if (first_two == 'random') {
+        cum_score_description = 'leaving uniform'
+        cum_score_recommendation = 'return to repetitive or introduce variability'
+        cum_note = 'J'
+    }
+    else if (last_two == 'regular') {
+        cum_score_description = 'becoming regular'
+        cum_score_recommendation = 'keep doing a regular action'  
+        cum_note = 'K'
+    }
+    else if (first_two == 'regular') {
+        cum_score_description = 'leaving regular'
+        cum_score_recommendation = 'keep doing what you are doing'  
+        cum_note = 'L'
+    }
+    else if (last_two == 'fractal') {
+        cum_score_description = 'becoming fractal'
+        cum_score_recommendation = 'stay with the fractal variability'  
+        cum_note = 'N'
+    }
+    else if (first_two == 'fractal') {
+        cum_score_description = 'leaving fractal'
+        cum_score_recommendation = 'bring back variability or make it repetitive'  
+        cum_note = 'O'
+    }
+    else if (last_two == 'complex') {
+        cum_score_description = 'becoming complex'
+        cum_score_recommendation = 'stay with the changing of pattern'  
+        cum_note = 'P'
+    }
+    else if (first_two == 'complex') {
+        cum_score_description = 'leaving complex'
+        cum_score_recommendation = 'keep changing pattern or introduce variability'  
+        cum_note = 'Q'
+    }
+    else if (counts_alpha['random'] == 2 && last_two != 'random' && first_two != 'random') {
+        cum_score_description = 'unstable random'
+        cum_score_recommendation = 'keep doing repetitive, regularize, or change pattern'  
+        cum_note = 'R'
+    }
+    else if (counts_alpha['regular'] == 2 && last_two != 'regular' && first_two != 'regular') {
+        cum_score_description = 'unstable regular'
+        cum_score_recommendation = 'introduce variability or highly repetitive action' 
+        cum_note = 'S' 
+    }
+    else if (counts_alpha['fractal'] == 2 && last_two != 'fractal' && first_two != 'fractal') {
+        cum_score_description = 'unstable fractal'
+        cum_score_recommendation = 'focus on fractal variability'  
+        cum_note = 'T'
+    }
+    else if (counts_alpha['complex'] == 2 && last_two != 'complex' && first_two != 'complex') {
+        cum_score_description = 'unstable complex'
+        cum_score_recommendation = 'keep changing pattern'  
+        cum_note = 'U'
+    }
+    else {
+        cum_score_description = 'diverse'
+        cum_score_recommendation = 'focus on fractal variability or keep shifting'
+        cum_note = 'V'
+    }
+
+    return {
+        description: cum_score_description, 
+        recommendation: cum_score_recommendation,
+        note: cum_note 
     }
 }
 
