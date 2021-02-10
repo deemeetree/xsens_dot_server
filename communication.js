@@ -409,6 +409,18 @@ function setEventHandlerFunctions()
 
         elem.innerHTML += '<br>' + alpha_info;
 
+        // Let's now add the image
+        // Get the image DIV
+        let sensor_image_container = document.getElementById('alpha-image-' + parameters.sensor)
+
+         // Adding alpha component image
+        var sensor_image = document.createElement('div')
+        sensor_image.innerHTML = '<img src="alphas/' + alpha_type + '.png" width="150" height="150">';
+        sensor_image.style.width = "20%";
+        sensor_image.style.padding = "10px";
+        sensor_image.style.color = "#FFFFFF";
+        sensor_image.style.flex = "1";
+        sensor_image_container.appendChild(sensor_image);
         // Update the general sensor sum
 
         // How many alphas we have for this particular sensor?
@@ -937,7 +949,7 @@ function addAlphaToList(sensorListName, address, clickHandler )
     var sensorAddress = document.createElement('div');
     sensorAddress.innerHTML = address.slice(-2);
     sensorAddress.style.padding = "10px";
-    label.style.width = "10%";
+    sensorAddress.style.width = "10%";
     sensorAddress.style.color = "#FFFFFF";
     sensorAddress.style.flex = "1";
     sensorAddress.style.fontSize = "45px";
@@ -945,13 +957,12 @@ function addAlphaToList(sensorListName, address, clickHandler )
 
     // Adding alpha component data
     var sensorAlpha = document.createElement('div')
-    sensorAlpha.innerHTML = ' ← ';
-    label.style.width = "90%";
+    sensorAlpha.innerHTML = ' ';
+    sensorAlpha.style.width = "90%";
     sensorAlpha.id = 'alpha-image-' + address;
     sensorAlpha.style.padding = "10px";
     sensorAlpha.style.color = "#FFFFFF";
-    sensorAddress.style.display = "flex";
-    sensorAddress.style.flex = "1";
+    sensorAlpha.style.display = "flex";
     label.appendChild(sensorAlpha);
 
 
