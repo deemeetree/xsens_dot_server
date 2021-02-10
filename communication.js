@@ -343,13 +343,17 @@ function setEventHandlerFunctions()
 
         let elem = document.getElementById('alpha-' + parameters.sensor)
 
-        elem.innerHTML = 'alpha: ' + parseFloat(parameters.alpha).toFixed(2);
+        // Add Alpha exponent received
+
+        elem.innerHTML = 'α: ' + parseFloat(parameters.alpha).toFixed(2);
 
         // Update alphaTimeline for each sensor
 
         if (!alphaTimeline[parameters.sensor]) {
             alphaTimeline[parameters.sensor] = []
         }
+
+        // Add the last value to alphaTimeline for this sensor
 
         alphaTimeline[parameters.sensor].push(parseFloat(parameters.alpha).toFixed(2))
 
@@ -361,7 +365,11 @@ function setEventHandlerFunctions()
             alphaScore[parameters.sensor] = []
         }
 
+        // Add alpha type to the list of values for this sensor
+
         alphaScore[parameters.sensor].push(alpha_type)
+
+        // Prepare data for the console
 
         let html_sensorConsole = ''
 
@@ -372,6 +380,8 @@ function setEventHandlerFunctions()
             html_sensorConsole += '<br><br>'
         }
 
+        // Add the data to the sensor console
+
         document.getElementById('sensorConsole').innerHTML = html_sensorConsole
 
          // Show the alpha diagnosis for each sensor
@@ -379,33 +389,36 @@ function setEventHandlerFunctions()
         let alpha_info = ''
 
         if (alpha_type == 'random') {
-            alpha_info = 'random irregularity'
+            alpha_info = 'UNIFORM'
          }
          else if (alpha_type == 'regular') {
-            alpha_info = 'organized regularity'
+            alpha_info = 'REGULAR'
          }
          else if (alpha_type == 'fractal') {
-            alpha_info = 'fractal variability'
+            alpha_info = 'FRACTAL'
          }
          else if (alpha_type == 'complex') {
-            alpha_info = 'complex phase-shifting'
+            alpha_info = 'COMPLEX'
         }
 
-        elem.innerHTML += ', ' + alpha_info;
+        elem.innerHTML += '<br>' + alpha_info;
 
         // Update the general sensor sum
 
-        
-
+        // How many alphas we have for this particular sensor?
         let current_length = alphaTimeline[parameters.sensor].length
+
+        // How many total sensors we have?
         let sensors_num = Object.keys(alphaTimeline).length
+
+        // What's the total length of all the alphas for all the sensors?
         let cumulative_length = 0
         
         for (let s in alphaTimeline) {
             cumulative_length += alphaTimeline[s].length
         }
         
-        // all alphas are recorded for the iteration?
+        // Create an empty array for the last alphas of each sensor
 
         let last_alphas = []
 
@@ -415,6 +428,8 @@ function setEventHandlerFunctions()
 
         if ((cumulative_length / sensors_num) == current_length) {
 
+            // Push the last alpha of each sensor in the last_alphas array
+
             for (let s in alphaTimeline) {
                 last_alphas.push(alphaTimeline[s].slice(-1).pop())
             }
@@ -422,6 +437,7 @@ function setEventHandlerFunctions()
             let average_alpha = 0
             let total_alpha = 0
     
+            // Calculate total
             for (let l of last_alphas) {
                 total_alpha += parseFloat(l)
             }
@@ -429,25 +445,35 @@ function setEventHandlerFunctions()
             // console.log('total_alpha', total_alpha)
             // console.log('last_alphas.length', last_alphas.length)
     
+            // Calculate the average alpha exponent across all the sensors
+
             average_alpha = total_alpha / last_alphas.length
     
             // console.log('average_alpha',average_alpha)
 
+            // Add this average alpha to the array
+
             cumulativeAlphaTimeline.push(average_alpha)
+
+            // Get the type of the alpha 
 
             let cumulative_alpha_type = getAlphaType(parseFloat(average_alpha).toFixed(2))
 
+            // Add this alpha to the cumulative alpha type array 
+
             cumulativeAlphaScore.push(cumulative_alpha_type)
+
+            // Display this in the doc
 
             document.getElementById('alphaConsole').innerHTML = cumulativeAlphaScore.join(' → ')
 
             let last_alpha_recommendation = ''
 
             if (cumulative_alpha_type == 'random') {
-                last_alpha_recommendation = 'random repetitiveness'
+                last_alpha_recommendation = 'uniform or repetitive'
              }
              else if (cumulative_alpha_type == 'regular') {
-                last_alpha_recommendation = 'organized regularity'
+                last_alpha_recommendation = 'regular variability'
              }
              else if (cumulative_alpha_type == 'fractal') {
                 last_alpha_recommendation = 'fractal variability'
@@ -458,14 +484,18 @@ function setEventHandlerFunctions()
 
             document.getElementById('lastAverageAlpha').innerHTML = 'current average alpha for all sensors: ' + parseFloat(average_alpha).toFixed(2) + ', ' + last_alpha_recommendation
 
+            // Let us now cut the last N values from the cumulative alpha exponent and type
+
             let cumAlpha = cumulativeAlphaTimeline.slice(-recommenderIterations)
 
             let cumScore = cumulativeAlphaScore.slice(-recommenderIterations)
             
-            // are we at least recommenderIterations (4) iterations?
+            // Are we at least recommenderIterations (3) iterations?
             if (cumAlpha.length == recommenderIterations) {
 
                 let cum_alpha_recommendation = ''
+
+                // What was the total cumulative Alpha exponent the last (3) iterations?
 
                 let total_last = 0
 
@@ -473,26 +503,28 @@ function setEventHandlerFunctions()
                     total_last += parseFloat(a)
                 } 
 
-                // what has been the average alpha the last recommenderIterations (3) iterations?
+                // Calculate average for the cumulative alpha
 
                 let avCumAlpha = total_last / recommenderIterations
 
                 let average_alpha_type = getAlphaType(parseFloat(avCumAlpha).toFixed(2))
 
+                // Show a recommendation
+
                 if (average_alpha_type == 'random') {
-                    cum_alpha_recommendation = 'make it more regular or change pattern'
-                    cum_alpha_description = 'random irregularity'
+                    cum_alpha_recommendation = 'make it more variable or change pattern'
+                    cum_alpha_description = 'uniform or repetitive'
                  }
                  else if (average_alpha_type == 'regular') {
-                    cum_alpha_recommendation = 'introduce more variability or randomness'
-                    cum_alpha_description = 'organized regularity'
+                    cum_alpha_recommendation = 'introduce fractality or be more uniform'
+                    cum_alpha_description = 'medium variability'
                  }
                  else if (average_alpha_type == 'fractal') {
-                    cum_alpha_recommendation = 'completely change the pattern or regularlize'
+                    cum_alpha_recommendation = 'change the pattern or reduce variability'
                     cum_alpha_description = 'fractal variability'
                  }
                  else if (average_alpha_type == 'complex') {
-                    cum_alpha_recommendation = 'make it more regular and mundane'
+                    cum_alpha_recommendation = 'make it more uniform or self-similar'
                     cum_alpha_description = 'complex phase-shifting'
                 }
 
@@ -523,28 +555,28 @@ function setEventHandlerFunctions()
                 let cum_score_recommendation = ''
                 
                 if (counts_alpha['random'] == 3) {
-                    cum_score_description = 'all repetitive'
+                    cum_score_description = 'all uniform'
                     cum_score_recommendation = 'make it more regular or change pattern'
                     
                  }
                  else if (counts_alpha['regular'] == 3) {
                     cum_score_description = 'all regular'
-                    cum_score_recommendation = 'introduce more variability or repetitiveness'
+                    cum_score_recommendation = 'introduce more fractality or uniformity'
                  }
                  else if (counts_alpha['fractal'] == 3) {
                     cum_score_description = 'all fractal'
-                    cum_score_recommendation = 'introduce a change in the pattern or regularlize'
+                    cum_score_recommendation = 'introduce a change in the pattern or uniformity'
                  }
                  else if (counts_alpha['complex'] == 3) {
                     cum_score_description = 'all complex'
-                    cum_score_recommendation = 'introduce more regularity and make it more mundane'  
+                    cum_score_recommendation = 'introduce more uniformity or fractality'  
                 }
                 else if (last_two == 'random') {
-                    cum_score_description = 'becoming random'
-                    cum_score_recommendation = 'keep doing repetitive action'
+                    cum_score_description = 'becoming uniform'
+                    cum_score_recommendation = 'keep doing uniform action'
                 }
                 else if (first_two == 'random') {
-                    cum_score_description = 'leaving random'
+                    cum_score_description = 'leaving uniform'
                     cum_score_recommendation = 'return to repetitive or introduce variability'
                 }
                 else if (last_two == 'regular') {
