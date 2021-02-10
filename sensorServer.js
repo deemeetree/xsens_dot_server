@@ -1290,15 +1290,12 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
          let alpha_exponent = parseFloat(interval_dataString[sensor])
          let alpha_score = ''
          let alpha_note = ''
-         let a = "[" + sensor.slice(-2) + "]"
-         let b = "α:" + parseFloat(interval_dataString[sensor]).toFixed(2)
-         let c = ""
 
 
+        // Which data to send?
          if (alpha_exponent < 0.42) {
             // console.log('negative correlation, mean-reverting')
              alpha_score = 'random'
-             c = 'uniform'
              alpha_note = 'A'
 
              // beep([0,400,400,1100,1100,400])
@@ -1306,83 +1303,30 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
          else if (alpha_exponent >= 0.42 && alpha_exponent <= 0.58) {
             // console.log('random white noise movement, unpredictable')
              alpha_score = 'random' 
-             c = 'uniform'
              alpha_note = 'A'
-             alpha_sign = "\
-       ▐█         ╟▌    \n\
-       ▐▌         ╟▌    \n\
-       ▐▌ " +c +" ╟▌    \n\
-       ▐▌         ╟▌    \n\
-       ▐▌         ╟▌    \n\
-       ▐▌  "+b +" ╟▌    \n\
-       ▐▌         ╟▌    \n\
-  ╓▄▄▄▄╫█▄▄▄▄▄▄▄▄▄██▄▄▄▄▄\n\
-       ▐▌         ╟▌    \n\
-       ▐▌   "+a+"  ╟▌    \n\
-       ▐█▄▄▄▄▄▄▄▄▄█▌    "
              // beep(3)
          }
          else if (alpha_exponent > 0.58 && alpha_exponent < 0.90) {
             // console.log('regular, mundane movement, positive feedback')
              alpha_score = 'regular'
-             c = 'variable'
              alpha_note = 'B'
-             alpha_sign = "\
-             ╟█           \n\
-          " + c + "       \n\
-             ╟█           \n\
-             ╟█           \n\
-        █  " +b+"  █      \n\
-       ██▌   ╟█   ▐██     \n\
-      █▌ █▌  ╟█  ╓█  █    \n\
-     █▌   █▌"+a+"█─  ╙█   \n\
-    ██     █▌╟█┌█`    ╟█  \n\
-   ▐█       ████▌      █▌ \n\
-  ╓█         ██▌        █▌"
              // beep([0,1100,1100,400,400,1100])
          }
          else if (alpha_exponent >= 0.90 && alpha_exponent <= 1.10) {
             // console.log('fractal movement, self-similar')
              alpha_score = 'fractal'
-             c = 'fractl'
              alpha_note = 'C'
-             alpha_sign = "\
-        ▀█▄      ▄█▀      \n\
-          ▀█▄  ▄█▀        \n\
-            ▀██▀          \n\
-             █▌           \n\
-             █▌           \n\
-            ████          \n\
-          █▀"+a+"▀█        \n\
-  ▄▄▄▄▄▄█▀`       ▀█▄▄▄▄▄▄\n\
-       █▌  " +b+"  ▐█\n\
-       █▌          ▐█     \n\
-       ▀   " +c+"   ▀     "
             //  beep(5)
          }
          else if (alpha_exponent > 1.10) {
           //   console.log('organized, highly complex (pathological) movement')
              alpha_score = 'complex'
-             c = 'complx'
              alpha_note = 'D'
-             alpha_sign = "\
-    ▀█▄             ▄█▀ \n\
-      ▀█▄ "+b +"  ▄█▀   \n\
-       ▀█▄      ▄█▀▀▀▀▀ \n\
-         ▀█▄  ▄█▀       \n\
-           └██─         \n\
-          " + c + "     \n\
-            ╟▌          \n\
-            ╟▌          \n\
-           "+a+"        \n\
-            ╟▌          \n\
-        ▄▄█▀▀           \n\
-    ▄▄█▀▀╙               "
              // beep([0,400,400,400,400,400,400,400])
          }
-         console.log(' ')
-         console.log(' ')
-         console.log(alpha_sign)
+
+        // Display the symbol
+         generateConsoleSymbol(sensor, interval_dataString[sensor], alpha_score)
 
         // DEBUG values
         //  console.log('Sensor:',sensor);
@@ -1440,17 +1384,84 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
 // -- Calculate chaos signature of the movement --
 // ---------------------------------------------------------------------------------------
 
-function generateConsoleSymbol(state) {
+function generateConsoleSymbol(sensor_code,alpha_exp, state) {
 
-    let symbol = ""
+    let a = "[" + sensor_code.slice(-2) + "]"
+    let b = "α:" + parseFloat(alpha_exp).toFixed(2)
+    let c = ""
 
-    switch (state)
-        {
-            case 'A':
+    let alpha_sign = ""
 
-                break;
-            
-        }
+    if (state == 'random') {
+        c = 'uniform'
+        alpha_sign = "\
+        ▐█         ╟▌    \n\
+        ▐▌         ╟▌    \n\
+        ▐▌ " +c +" ╟▌    \n\
+        ▐▌         ╟▌    \n\
+        ▐▌         ╟▌    \n\
+        ▐▌  "+b +" ╟▌    \n\
+        ▐▌         ╟▌    \n\
+   ╓▄▄▄▄╫█▄▄▄▄▄▄▄▄▄██▄▄▄▄▄\n\
+        ▐▌         ╟▌    \n\
+        ▐▌   "+a+"  ╟▌    \n\
+        ▐█▄▄▄▄▄▄▄▄▄█▌    "
+        
+    }
+    else if (state == 'regular') {
+        c = 'variable'
+             alpha_sign = "\
+             ╟█           \n\
+          " + c + "       \n\
+             ╟█           \n\
+             ╟█           \n\
+        █  " +b+"  █      \n\
+       ██▌   ╟█   ▐██     \n\
+      █▌ █▌  ╟█  ╓█  █    \n\
+     █▌   █▌"+a+" █─  ╙█   \n\
+    ██     █▌╟█┌█`    ╟█  \n\
+   ▐█       ████▌      █▌ \n\
+  ╓█         ██▌        █▌"
+
+    }
+    else if (state == 'fractal') {
+        c = 'fractl'
+        alpha_sign = "\
+        ▀█▄      ▄█▀      \n\
+          ▀█▄  ▄█▀        \n\
+            ▀██▀          \n\
+             █▌           \n\
+             █▌           \n\
+            ████          \n\
+          █▀"+a+"▀█        \n\
+  ▄▄▄▄▄▄█▀`       ▀█▄▄▄▄▄▄\n\
+       █▌  " +b+"  ▐█\n\
+       █▌          ▐█     \n\
+       ▀   " +c+"   ▀     "        
+    }
+    else if (state == 'complex') {
+        c = 'complex'
+             alpha_sign = "\
+    ▀█▄             ▄█▀ \n\
+      ▀█▄ "+b +"  ▄█▀   \n\
+       ▀█▄      ▄█▀▀▀▀▀ \n\
+         ▀█▄  ▄█▀       \n\
+           └██─         \n\
+          " + c + "     \n\
+            ╟▌          \n\
+            ╟▌          \n\
+           "+a+"        \n\
+            ╟▌          \n\
+        ▄▄█▀▀           \n\
+    ▄▄█▀▀╙               "     
+    }
+
+
+    console.log(' ')
+    
+    console.log(alpha_sign)
+    
+    console.log(' ')
 
 }
 
