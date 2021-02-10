@@ -421,6 +421,8 @@ function setEventHandlerFunctions()
         sensor_image.style.color = "#FFFFFF";
         sensor_image.style.flex = "1";
         sensor_image_container.appendChild(sensor_image);
+
+        sensor_image_container.scrollLeft = sensor_image_container.scrollWidth;
         // Update the general sensor sum
 
         // How many alphas we have for this particular sensor?
@@ -949,7 +951,7 @@ function addAlphaToList(sensorListName, address, clickHandler )
     var sensorAddress = document.createElement('div');
     sensorAddress.innerHTML = address.slice(-2);
     sensorAddress.style.padding = "10px";
-    sensorAddress.style.width = "10%";
+    sensorAddress.style.width = "100px";
     sensorAddress.style.color = "#FFFFFF";
     sensorAddress.style.flex = "1";
     sensorAddress.style.fontSize = "45px";
@@ -958,9 +960,10 @@ function addAlphaToList(sensorListName, address, clickHandler )
     // Adding alpha component data
     var sensorAlpha = document.createElement('div')
     sensorAlpha.innerHTML = ' ';
-    sensorAlpha.style.width = "90%";
+    sensorAlpha.style['max-width'] = "900px";
     sensorAlpha.id = 'alpha-image-' + address;
     sensorAlpha.style.padding = "10px";
+    sensorAlpha.style['overflow-x'] = 'scroll';
     sensorAlpha.style.color = "#FFFFFF";
     sensorAlpha.style.display = "flex";
     label.appendChild(sensorAlpha);
