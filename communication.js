@@ -139,6 +139,7 @@ function setEventHandlerFunctions()
     eventHandlerFunctions[ 'sensorDiscovered' ] = function( eventName, parameters  )
     {
         addSensorToList( discoveredSensors, "DiscoveredSensors", parameters.address );
+        addAlphaToList( "AlphaScores", parameters.address );
     };
 
     eventHandlerFunctions[ 'scanningStarted' ] = function( eventName, parameters  )
@@ -292,6 +293,10 @@ function setEventHandlerFunctions()
     {
     };
 
+    eventHandlerFunctions[  'sensorAdvice' ] = function( eventName, parameters  )
+    {
+    };
+
     eventHandlerFunctions[  'averageAlpha' ] = function( eventName, parameters  )
     {
     };
@@ -344,14 +349,7 @@ function setEventHandlerFunctions()
     {
         console.log("Received Alpha", parameters)
 
-        // Update HTML 
-
-        let elem = document.getElementById('alpha-' + parameters.sensor)
-
-        // Add Alpha exponent received
-
-        elem.innerHTML = 'α: ' + parseFloat(parameters.alpha).toFixed(2);
-
+        
         // Update alphaTimeline for each sensor
 
         if (!alphaTimeline[parameters.sensor]) {
@@ -363,7 +361,6 @@ function setEventHandlerFunctions()
         alphaTimeline[parameters.sensor].push(parseFloat(parameters.alpha).toFixed(2))
 
        // Update alphaScore for each sensor
-
         let alpha_type = getAlphaType(parseFloat(parameters.alpha).toFixed(2))
 
         if (!alphaScore[parameters.sensor]) {
@@ -371,11 +368,9 @@ function setEventHandlerFunctions()
         }
 
         // Add alpha type to the list of values for this sensor
-
         alphaScore[parameters.sensor].push(alpha_type)
 
         // Prepare data for the console
-
         let html_sensorConsole = ''
 
         for (let sens in alphaScore) {
@@ -386,10 +381,16 @@ function setEventHandlerFunctions()
         }
 
         // Add the data to the sensor console
-
         document.getElementById('sensorConsole').innerHTML = html_sensorConsole
 
          // Show the alpha diagnosis for each sensor
+
+        // Get the HTML 
+        let elem = document.getElementById('alpha-' + parameters.sensor)
+
+        // Add Alpha exponent received
+        elem.innerHTML = 'α: ' + parseFloat(parameters.alpha).toFixed(2);
+
 
         let alpha_info = ''
 
@@ -423,25 +424,82 @@ function setEventHandlerFunctions()
             cumulative_length += alphaTimeline[s].length
         }
         
-        // Create an empty array for the last alphas of each sensor
+        // Let's check if we accumulated enough alphas for this sensor 
+        // to calculate a historical recommendation for this sensor
 
-        let last_alphas = []
+        if (current_length % recommenderIterations == 0) {
 
+
+            // Let us now cut the last N values from the cumulative alpha exponent and type
+            let thisAlpha = alphaTimeline[parameters.sensor].slice(-recommenderIterations)
+            let thisScore = alphaScore[parameters.sensor].slice(-recommenderIterations)
+
+            // What was the total cumulative Alpha exponent the last (3) iterations?
+            let thisTotal = 0
+
+            for (let a of thisAlpha) {
+                thisTotal += parseFloat(a)
+            } 
+
+            // Calculate average for the cumulative alpha
+            let thisCumAlpha = thisTotal / recommenderIterations
+
+            let thisCumScore = getAlphaType(parseFloat(thisCumAlpha).toFixed(2))
+           
+            // For HTML output
+            let cum_alpha_score = thisScore.join(' → ')
+
+            // let's now see what has been the last cumulative average score
+
+            let this_score_state = ''
+            let this_score_recommendation = ''
+            let this_note = ''
+            let this_sensor = parameters.sensor
+            let this_signal = ''
+            let this_advice = ''
+
+            
+            let alpha_all_historic = getHistoricAlphaType(thisScore) 
+
+            this_score_state = alpha_all_historic.description
+            this_score_recommendation = alpha_all_historic.recommendation
+            this_note = alpha_all_historic.note
+            this_signal = alpha_all_historic.signal
+            this_advice = alpha_all_historic.advice
+
+            // Get the HTML 
+            let elem_advice = document.getElementById('advice-' + this_sensor)
+
+            // Add Alpha exponent received
+            elem_advice.innerHTML = this_score_state;
+
+
+            elem_advice.innerHTML += '<br>→ ' + this_advice;
+
+
+            sendGuiEvent( 'sensorAdvice', {alpha: parseFloat(thisCumAlpha).toFixed(2), sensor: this_sensor, note: this_note, state: this_score_state, advice: this_score_recommendation, signal: this_signal } );
+
+
+
+
+        }
+
+        
+        // Calculate the average for all the sensors if the time is right
+
+        // for Debug
         // console.log('cumulative_length', cumulative_length)
+        // console.log('triggered_length', triggered_length)
         // console.log('sensors_num', sensors_num)
         // console.log('current_length', current_length)
 
-
-
-        // launch this every time we have passed at least N(number of sensors) updates
-        // so 1 each or if only one then at least a few iterations of the other ones ahead
-
-        // TODO deal with the situation where a sensor may be switched off and then turned back on again
-
-        if ((cumulative_length - triggered_length) == sensors_num) {
+        if (((cumulative_length - triggered_length) >= sensors_num) && cumulative_length != 1 && sensors_num != 1) {
 
             // Set the number of data points at the point of this update
             triggered_length = cumulative_length 
+
+            // Create an empty array for the last alphas of each sensor
+            let last_alphas = []
             
             // Push the last alpha of each sensor in the last_alphas array
             for (let s in alphaTimeline) {
@@ -549,6 +607,7 @@ function setEventHandlerFunctions()
                 let cum_score_description = ''
                 let cum_score_recommendation = ''
                 let cum_note = ''
+                let cum_signal = ''
 
                 
                 let alpha_all_historic = getHistoricAlphaType(cumScore) 
@@ -556,6 +615,7 @@ function setEventHandlerFunctions()
                 cum_score_description = alpha_all_historic.description
                 cum_score_recommendation = alpha_all_historic.recommendation
                 cum_note = alpha_all_historic.note
+                cum_signal = alpha_all_historic.signal
 
 
                 document.getElementById('alphaRecommendation').innerHTML = 
@@ -568,8 +628,8 @@ function setEventHandlerFunctions()
                 '<h4>' + cum_alpha_score + ' | ' + cum_score_description + '</h4><br><br>' + 
                 'eightos recommendation:<br><h4>' + cum_score_recommendation + '</h4>';
 
-
-                sendGuiEvent( 'eightOSAdvice', {alpha: parseFloat(avCumAlpha).toFixed(2), note: cum_note, state: cum_score_description, advice: cum_score_recommendation } );
+                console.log('avCumAlpha', avCumAlpha)
+                sendGuiEvent( 'eightOSAdvice', {alpha: parseFloat(avCumAlpha).toFixed(2), note: cum_note, state: cum_score_description, advice: cum_score_recommendation, signal: cum_signal } );
 
 
             }
@@ -746,6 +806,7 @@ function loadConnectedSensors( connectedSensors )
         this.connectedSensors.forEach( function (address)
         {
             addSensorToList( discoveredSensors, "DiscoveredSensors", address );
+            addAlphaToList( "AlphaScores", address );
 
             var logoImage = document.getElementById(ID_LOGO_IMAGE + address);
             if (logoImage != null)
@@ -780,7 +841,7 @@ function addSensorToList( sensorList, sensorListName, address, clickHandler )
 
     var label = document.createElement("div");
     label.setAttribute( "id", sensorListName+address );
-    label.style.width = "500px";
+    label.style.width = "600px";
     label.style.display = "flex";
 
     sensorListElement.appendChild(label);
@@ -832,6 +893,16 @@ function addSensorToList( sensorList, sensorListName, address, clickHandler )
     sensorAlpha.style.fontSize = "16px";
     label.appendChild(sensorAlpha);
 
+    // Adding alpha component data
+    var sensorAdvice = document.createElement('label')
+    sensorAdvice.innerHTML = 'last ' + recommenderIterations +  ' states: n/a';
+    sensorAdvice.id = 'advice-' + address;
+    sensorAdvice.style.padding = "10px";
+    sensorAdvice.style.color = "#FFFFFF";
+    sensorAdvice.style.flex = "1";
+    sensorAdvice.style.fontSize = "16px";
+    label.appendChild(sensorAdvice);
+
     var connectionControlButton = document.createElement("button");
     connectionControlButton.id = ID_CONNECTION_CONTROL_BUTTON + address;
     connectionControlButton.name = address;
@@ -843,6 +914,46 @@ function addSensorToList( sensorList, sensorListName, address, clickHandler )
     connectionControlButton.onmouseout = onButtonMouseOut;
 
     label.appendChild(connectionControlButton);
+
+
+    var newLine = document.createElement( "br" );
+    label.appendChild(newLine);
+}
+
+function addAlphaToList(sensorListName, address, clickHandler )
+{
+
+    var lineHeight = "38px";
+
+    let sensorListElement = document.getElementById(sensorListName);
+
+    var label = document.createElement("div");
+    label.setAttribute( "id", sensorListName+address );
+    label.style.width = "100%";
+    label.style.display = 'flex';
+    sensorListElement.appendChild(label);
+
+
+    var sensorAddress = document.createElement('div');
+    sensorAddress.innerHTML = address.slice(-2);
+    sensorAddress.style.padding = "10px";
+    label.style.width = "10%";
+    sensorAddress.style.color = "#FFFFFF";
+    sensorAddress.style.flex = "1";
+    sensorAddress.style.fontSize = "45px";
+    label.appendChild(sensorAddress);
+
+    // Adding alpha component data
+    var sensorAlpha = document.createElement('div')
+    sensorAlpha.innerHTML = ' ← ';
+    label.style.width = "90%";
+    sensorAlpha.id = 'alpha-image-' + address;
+    sensorAlpha.style.padding = "10px";
+    sensorAlpha.style.color = "#FFFFFF";
+    sensorAddress.style.display = "flex";
+    sensorAddress.style.flex = "1";
+    label.appendChild(sensorAlpha);
+
 
     var newLine = document.createElement( "br" );
     label.appendChild(newLine);
@@ -1223,7 +1334,9 @@ function getHistoricAlphaType(cumScore) {
 
     let cum_score_description = ''
     let cum_score_recommendation = ''
+    let cum_score_advice = ''
     let cum_note = ''
+    let cum_signal = ''
 
     
     let counts_alpha = {}
@@ -1250,94 +1363,130 @@ function getHistoricAlphaType(cumScore) {
     if (counts_alpha['random'] == 3) {
         cum_score_description = 'all uniform'
         cum_score_recommendation = 'make it more regular or change pattern'
+        cum_score_advice = 'VARIATE'
         cum_note = 'E'
+        cum_signal = 'V'
         
      }
      else if (counts_alpha['regular'] == 3) {
         cum_score_description = 'all regular'
         cum_score_recommendation = 'introduce more fractality or uniformity'
+        cum_score_advice = 'FRACTALIZE'
         cum_note = 'F'
+        cum_signal = 'F'
      }
      else if (counts_alpha['fractal'] == 3) {
         cum_score_description = 'all fractal'
         cum_score_recommendation = 'introduce a change in the pattern or uniformity'
+        cum_score_advice = 'LOOP'
         cum_note = 'G'
+        cum_signal = 'L'
      }
      else if (counts_alpha['complex'] == 3) {
         cum_score_description = 'all complex'
         cum_score_recommendation = 'introduce more uniformity or fractality'  
+        cum_score_advice = 'RELAX'
         cum_note = 'H'
+        cum_signal = 'R'
     }
     else if (last_two == 'random') {
         cum_score_description = 'becoming uniform'
         cum_score_recommendation = 'keep doing uniform action'
+        cum_score_advice = 'MAINTAIN'
         cum_note = 'I'
+        cum_signal = 'M'
     }
     else if (first_two == 'random') {
         cum_score_description = 'leaving uniform'
         cum_score_recommendation = 'return to repetitive or introduce variability'
+        cum_score_advice = 'LOOP OR VARIATE'
         cum_note = 'J'
+        cum_signal = 'W'
     }
     else if (last_two == 'regular') {
         cum_score_description = 'becoming regular'
         cum_score_recommendation = 'keep doing a regular action'  
+        cum_score_advice = 'MAINTAIN'
         cum_note = 'K'
+        cum_signal = 'M'
     }
     else if (first_two == 'regular') {
         cum_score_description = 'leaving regular'
         cum_score_recommendation = 'keep doing what you are doing'  
+        cum_score_advice = 'MAINTAIN'
         cum_note = 'L'
+        cum_signal = 'M'
     }
     else if (last_two == 'fractal') {
         cum_score_description = 'becoming fractal'
         cum_score_recommendation = 'stay with the fractal variability'  
+        cum_score_advice = 'FRACTALIZE'
         cum_note = 'N'
+        cum_signal = 'F'
     }
     else if (first_two == 'fractal') {
         cum_score_description = 'leaving fractal'
         cum_score_recommendation = 'bring back variability or make it repetitive'  
+        cum_score_advice = 'VARIATE'
         cum_note = 'O'
+        cum_signal = 'V'
     }
     else if (last_two == 'complex') {
         cum_score_description = 'becoming complex'
         cum_score_recommendation = 'stay with the changing of pattern'  
+        cum_score_advice = 'DISRUPT'
         cum_note = 'P'
+        cum_signal = 'T'
     }
     else if (first_two == 'complex') {
         cum_score_description = 'leaving complex'
         cum_score_recommendation = 'keep changing pattern or introduce variability'  
+        cum_score_advice = 'VARIATE'
         cum_note = 'Q'
+        cum_signal = 'V'
     }
     else if (counts_alpha['random'] == 2 && last_two != 'random' && first_two != 'random') {
         cum_score_description = 'unstable random'
         cum_score_recommendation = 'keep doing repetitive, regularize, or change pattern'  
+        cum_score_advice = 'CHOOSE'
         cum_note = 'R'
+        cum_signal = 'S'
     }
     else if (counts_alpha['regular'] == 2 && last_two != 'regular' && first_two != 'regular') {
         cum_score_description = 'unstable regular'
         cum_score_recommendation = 'introduce variability or highly repetitive action' 
+        cum_score_advice = 'LOOP OR VARIATE'
         cum_note = 'S' 
+        cum_signal = 'W'
     }
     else if (counts_alpha['fractal'] == 2 && last_two != 'fractal' && first_two != 'fractal') {
         cum_score_description = 'unstable fractal'
         cum_score_recommendation = 'focus on fractal variability'  
+        cum_score_advice = 'FRACTALIZE'
         cum_note = 'T'
+        cum_signal = 'F'
     }
     else if (counts_alpha['complex'] == 2 && last_two != 'complex' && first_two != 'complex') {
         cum_score_description = 'unstable complex'
         cum_score_recommendation = 'keep changing pattern'  
+        cum_score_advice = 'DISRUPT'
         cum_note = 'U'
+        cum_signal = 'T'
     }
     else {
         cum_score_description = 'diverse'
         cum_score_recommendation = 'focus on fractal variability or keep shifting'
+        cum_score_advice = 'FRACTALIZE'
         cum_note = 'V'
+        cum_signal = 'F'
     }
 
     return {
         description: cum_score_description, 
         recommendation: cum_score_recommendation,
-        note: cum_note 
+        advice: cum_score_advice,
+        note: cum_note,
+        signal: cum_signal
     }
 }
 

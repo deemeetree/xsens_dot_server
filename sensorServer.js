@@ -155,6 +155,7 @@ var transitions =
             let alpha_score = ''
             let alpha_note = ''
             let alpha_state = ''
+            let alpha_signal = ''
             let alpha_result = {}
    
             alpha_result = getAlphaType(alpha_exponent)
@@ -166,6 +167,7 @@ var transitions =
             alpha_note = parameters.note
             alpha_advice = parameters.advice
             alpha_state = parameters.state
+            alpha_signal = parameters.signal
    
            // Display the symbol
             console.log(' ')
@@ -175,6 +177,7 @@ var transitions =
             console.log(' ')
             console.log('state: ' + alpha_state)
             console.log('advice: ' + alpha_advice)
+            console.log('note: ' + alpha_note + ' | signal: ' + alpha_signal)
             console.log(' ')
             console.log('++++++[END HISTORICAL]++++++')
             console.log(' ')
@@ -183,7 +186,58 @@ var transitions =
            //  console.log('Sensor:',sensor);
            //  console.log('Alpha Component:',alpha_exponent);
    
-            sendAlphaViaOSC('alpha_history', 'all', alpha_exponent, alpha_note)
+            sendAlphaViaOSC('alpha_history', 'all', alpha_exponent, alpha_note, alpha_signal)
+
+	    }
+    },
+    {
+		stateName: 'Recording',
+        eventName: 'sensorAdvice',
+        nextState: 'Recording',
+		
+		transFunc:function( component, parameters )
+	    {
+          
+            let alpha_exponent = parseFloat(parameters.alpha)
+            let alpha_score = ''
+            let alpha_note = ''
+            let alpha_state = ''
+            let alpha_signal = ''
+            let alpha_sensor = ''
+            let alpha_result = {}
+   
+            alpha_result = getAlphaType(alpha_exponent)
+            
+            // this is for the image
+            alpha_score = alpha_result['score']
+
+            // this is for the OSC and Text
+            alpha_note = parameters.note
+            alpha_advice = parameters.advice
+            alpha_state = parameters.state
+            alpha_signal = parameters.signal
+            alpha_sensor = parameters.sensor
+
+            let ac = alpha_sensor.slice(-2)
+   
+           // Display the symbol
+            console.log(' ')
+            console.log(' ')
+            console.log('++++++['+ac+'] HISTORICAL++++++')
+            generateConsoleSymbol(alpha_sensor, alpha_exponent, alpha_score)
+            console.log(' ')
+            console.log('state: ' + alpha_state)
+            console.log('advice: ' + alpha_advice)
+            console.log('note: ' + alpha_note + ' | signal: ' + alpha_signal)
+            console.log(' ')
+            console.log('++++[END ['+ac+'] HISTORICAL]++++')
+            console.log(' ')
+            console.log(' ')
+           // DEBUG values
+           //  console.log('Sensor:',sensor);
+           //  console.log('Alpha Component:',alpha_exponent);
+   
+            sendAlphaViaOSC('alpha_history', alpha_sensor, alpha_exponent, alpha_note, alpha_signal)
 
 	    }
     },
@@ -1411,7 +1465,7 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
 // ---------------------------------------------------------------------------------------
 
 
-function sendAlphaViaOSC(message, sensor, alpha_exponent, alpha_note) {
+function sendAlphaViaOSC(message, sensor, alpha_exponent, alpha_note, alpha_signal) {
 
     for (let i = 0; i < 20; i++) {
 
@@ -1422,6 +1476,12 @@ function sendAlphaViaOSC(message, sensor, alpha_exponent, alpha_note) {
         setTimeout(()=>{
             osc.send(new OSC.Message('/' + message + '_note/' + sensor, alpha_note), {port: osc_options.open.port, host: osc_options.open.host})
         },50*i)
+
+        if (alpha_signal) {
+            setTimeout(()=>{
+                osc.send(new OSC.Message('/' + message + '_signal/' + sensor, alpha_signal), {port: osc_options.open.port, host: osc_options.open.host})
+            },50*i)
+        }
        
      }
 }

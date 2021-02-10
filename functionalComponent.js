@@ -199,6 +199,11 @@ class FunctionalComponent
             return;
         }
         else 
+        if (eventName == 'sensorAdvice') {
+            this.globalEventHandler( eventName, parameters );
+            return;
+        }
+        else 
         if (eventName == 'averageAlpha') {
             this.globalEventHandler( eventName, parameters );
             return;
