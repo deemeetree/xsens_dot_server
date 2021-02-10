@@ -85,6 +85,7 @@ const HEADING_STATUS_XRM_HEADING = 1;
 
 // alpha fractal parameters
 var alphaTimeline = {}
+var alphaScore = {}
 var cumulativeAlphaTimeline = []
 var cumulativeAlphaScore = []
 let recommenderIterations = 3 
@@ -352,9 +353,28 @@ function setEventHandlerFunctions()
 
         alphaTimeline[parameters.sensor].push(parseFloat(parameters.alpha).toFixed(2))
 
-        // Show the alpha diagnosis for each sensor
+       // Update alphaScore for each sensor
 
         let alpha_type = getAlphaType(parseFloat(parameters.alpha).toFixed(2))
+
+        if (!alphaScore[parameters.sensor]) {
+            alphaScore[parameters.sensor] = []
+        }
+
+        alphaScore[parameters.sensor].push(alpha_type)
+
+        let html_sensorConsole = ''
+
+        for (let sens in alphaScore) {
+            html_sensorConsole += sens
+            html_sensorConsole += '<br>'
+            html_sensorConsole += alphaScore[sens].join(' → ')
+            html_sensorConsole += '<br><br>'
+        }
+
+        document.getElementById('sensorConsole').innerHTML = html_sensorConsole
+
+         // Show the alpha diagnosis for each sensor
 
         let alpha_info = ''
 
@@ -418,6 +438,8 @@ function setEventHandlerFunctions()
             let cumulative_alpha_type = getAlphaType(parseFloat(average_alpha).toFixed(2))
 
             cumulativeAlphaScore.push(cumulative_alpha_type)
+
+            document.getElementById('alphaConsole').innerHTML = cumulativeAlphaScore.join(' → ')
 
             let last_alpha_recommendation = ''
 
