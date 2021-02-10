@@ -117,8 +117,12 @@ var transitions =
 		transFunc:function( component, parameters )
 	    {
           
+            console.log('\n\n')
+            console.log('=============================================')
             console.log('received EightOS advice')
             console.log(parameters)
+            console.log('=============================================')
+            console.log('\n\n')
 
 	    }
     },
@@ -982,10 +986,11 @@ var transitions =
                         ++interval_iterations[parameters.address]
                     }
 
-                    console.log('Firing the Function on Data')
-                    console.log(interval_data)
-                    console.log('Interval Iteration')
-                    console.log(interval_iterations)
+                    // DEBUG BELOW
+                    // console.log('Firing the Function on Data')
+                    // console.log(interval_data)
+                    // console.log('Interval Iteration')
+                    // console.log(interval_iterations)
                 
                     // For each sensor, calculate the Fractal signature
 
@@ -1280,46 +1285,110 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
       /*Once the stream is done (on 'end') we want to simply log the received data to the console.*/
      py[sensor][py_iterations].stdout.on('end', function(){
 
-         console.log('Sensor:',sensor);
-         console.log('Alpha Component:',parseFloat(interval_dataString[sensor]));
-         console.log('based on the array length:', interval_data[sensor].length)
+       
        
          let alpha_exponent = parseFloat(interval_dataString[sensor])
          let alpha_score = ''
          let alpha_note = ''
+         let a = "[" + sensor.slice(-2) + "]"
+         let b = "α:" + parseFloat(interval_dataString[sensor]).toFixed(2)
+         let c = ""
+
 
          if (alpha_exponent < 0.42) {
-             console.log('negative correlation, mean-reverting')
+            // console.log('negative correlation, mean-reverting')
              alpha_score = 'random'
+             c = 'uniform'
              alpha_note = 'A'
+
              // beep([0,400,400,1100,1100,400])
          }
          else if (alpha_exponent >= 0.42 && alpha_exponent <= 0.58) {
-             console.log('random white noise movement, unpredictable')
-             alpha_score = 'random'
+            // console.log('random white noise movement, unpredictable')
+             alpha_score = 'random' 
+             c = 'uniform'
              alpha_note = 'A'
+             alpha_sign = "\
+       ▐█         ╟▌    \n\
+       ▐▌         ╟▌    \n\
+       ▐▌ " +c +" ╟▌    \n\
+       ▐▌         ╟▌    \n\
+       ▐▌         ╟▌    \n\
+       ▐▌  "+b +" ╟▌    \n\
+       ▐▌         ╟▌    \n\
+  ╓▄▄▄▄╫█▄▄▄▄▄▄▄▄▄██▄▄▄▄▄\n\
+       ▐▌         ╟▌    \n\
+       ▐▌   "+a+"  ╟▌    \n\
+       ▐█▄▄▄▄▄▄▄▄▄█▌    "
              // beep(3)
          }
          else if (alpha_exponent > 0.58 && alpha_exponent < 0.90) {
-             console.log('regular, mundane movement, positive feedback')
+            // console.log('regular, mundane movement, positive feedback')
              alpha_score = 'regular'
+             c = 'variable'
              alpha_note = 'B'
+             alpha_sign = "\
+             ╟█           \n\
+          " + c + "       \n\
+             ╟█           \n\
+             ╟█           \n\
+        █  " +b+"  █      \n\
+       ██▌   ╟█   ▐██     \n\
+      █▌ █▌  ╟█  ╓█  █    \n\
+     █▌   █▌"+a+"█─  ╙█   \n\
+    ██     █▌╟█┌█`    ╟█  \n\
+   ▐█       ████▌      █▌ \n\
+  ╓█         ██▌        █▌"
              // beep([0,1100,1100,400,400,1100])
          }
          else if (alpha_exponent >= 0.90 && alpha_exponent <= 1.10) {
-             console.log('fractal movement, self-similar')
+            // console.log('fractal movement, self-similar')
              alpha_score = 'fractal'
+             c = 'fractl'
              alpha_note = 'C'
+             alpha_sign = "\
+        ▀█▄      ▄█▀      \n\
+          ▀█▄  ▄█▀        \n\
+            ▀██▀          \n\
+             █▌           \n\
+             █▌           \n\
+            ████          \n\
+          █▀"+a+"▀█        \n\
+  ▄▄▄▄▄▄█▀`       ▀█▄▄▄▄▄▄\n\
+       █▌  " +b+"  ▐█\n\
+       █▌          ▐█     \n\
+       ▀   " +c+"   ▀     "
             //  beep(5)
          }
          else if (alpha_exponent > 1.10) {
-             console.log('organized, highly complex (pathological) movement')
+          //   console.log('organized, highly complex (pathological) movement')
              alpha_score = 'complex'
+             c = 'complx'
              alpha_note = 'D'
+             alpha_sign = "\
+    ▀█▄             ▄█▀ \n\
+      ▀█▄ "+b +"  ▄█▀   \n\
+       ▀█▄      ▄█▀▀▀▀▀ \n\
+         ▀█▄  ▄█▀       \n\
+           └██─         \n\
+          " + c + "     \n\
+            ╟▌          \n\
+            ╟▌          \n\
+           "+a+"        \n\
+            ╟▌          \n\
+        ▄▄█▀▀           \n\
+    ▄▄█▀▀╙               "
              // beep([0,400,400,400,400,400,400,400])
          }
-
          console.log(' ')
+         console.log(' ')
+         console.log(alpha_sign)
+
+        // DEBUG values
+        //  console.log('Sensor:',sensor);
+        //  console.log('Alpha Component:',parseFloat(interval_dataString[sensor]));
+        //  console.log('based on the array length:', interval_data[sensor].length)
+         
 
          // TODO make another function which sends composite OSC
 
@@ -1365,6 +1434,26 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
      
 
 }
+
+
+// ---------------------------------------------------------------------------------------
+// -- Calculate chaos signature of the movement --
+// ---------------------------------------------------------------------------------------
+
+function generateConsoleSymbol(state) {
+
+    let symbol = ""
+
+    switch (state)
+        {
+            case 'A':
+
+                break;
+            
+        }
+
+}
+
 
 // =======================================================================================
 // Export the Sensor Server class
