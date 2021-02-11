@@ -180,6 +180,10 @@ TO RUN THE APPLICATION
 7. Click `Start Streaming`
 
 
+===
+ALPHA LOGIC AND OSC NOTES
+===
+
 ## Alpha Values and OSC Notes
 
 There are *4 states* of the Alpha possible. They are calculated for each separate sensor and for all the sensors at the same time every 30 seconds. 
@@ -191,28 +195,28 @@ The value (usually ~0.3 to 1.5 max) is sent to the OSC `/alpha/sensor_id` channe
 1. alpha <= 0.60 (Note: A) UNIFORM / RANDOM
 Repetitive, Uniform, Random Movement (0/1, up/down, left/right). Also when the sensors are on the table, not moving
 
-![](/images/alphas/random.png "InfraNodus Interface")
+![](/images/alphas/random-black.png "InfraNodus Interface")
 
 --
 
 2. alpha > 0.60 && alpha < 0.90 (Note: B) REGULAR
 Regular movement (e.g. standard dancing, doing stuff, walking). Most of the time we are here
 
-![](/images/alphas/regular.png "InfraNodus Interface")
+![](/images/alphas/regular-black.png "InfraNodus Interface")
 
 --
 
 3. alpha >= 0.90 && alpha <= 1.10 (Note: C) FRACTAL
 Fractal movement — this is what we're looking for - variative movement, butoh, adaptive movement.
 
-![](/images/alphas/fractal.png "InfraNodus Interface")
+![](/images/alphas/fractal-black.png "InfraNodus Interface")
 
 --
 
 4. alpha > 1.10 (Note: D) COMPLEX
 Complex movements with phase shifts — changing patterns of movement.
 
-![](/images/alphas/complex.png "InfraNodus Interface")
+![](/images/alphas/complex-black.png "InfraNodus Interface")
 
 --
 
@@ -227,7 +231,7 @@ A for random (1), B for regular (2), C for fractal (3), D for complex (4)
 
 ## Average Alpha For All Sensors
 
-An average alpha is also calculated for all the sensors, so we can see the state of the whole system at every point of time.
+An average alpha is also calculated for all the sensors, so we can see the state of the whole system (all the dancers or all the body parts) at every point of time.
 
 The alpha is sent to 
 
@@ -265,17 +269,23 @@ For that, we take the last 3 global states (last 3 **Average** states of the sys
 
 `/alpha_history/all`
 
-### Special Recommendation Signal
+--
+
+## Special Recommendation Signal
 
 Finally, each historical state can have more than 4 states, because we are dealing with the combination of the last 3 states. 
 
 So that means that it could be, for example, ABC, but also BBC and so on. 
 
+This is why there are more values for Historical notes than for the standard alpha states. Because we have more possible states. 
+
+We also use it to provide an advice: based on the last 3 states (regular, fractal, random or complex) what you should do next. 
+
 --
 
 This can be sent as as **Note** to `/alpha_history_note/sensor_id` for each sensor and `/alpha_history_note/all` for all the sensors.
 
-THIS NOTE CAN HAVE VALUES FROM `E` to `V` - LOTS OF VARIETY - 18 states
+THIS NOTE CAN HAVE VALUES FROM `E` to `V` (in alphabetical order) - LOTS OF VARIETY - 18 states
 
 --
 
@@ -283,11 +293,13 @@ And as a **Signal** (less options) to `/alpha_history_signal/sensor_id` for each
 
 THE SIGNAL HAS LESS VARIETY: `V`, `L`, `R`, `F`, `W`, `S`, `T`, `M` -  8 states
 
+We also provide an advice for the next action based on this logic. The advice is encoded via the OSC **Signal** code above.
+
+This advice is also displayed in the Terminal and in the Browser.
+
 --
 
-We also provide an advice for the next action based on this logic.
-
-We keep total 16 combinations and the logic is as follows:
+We have total 18 combinations and the logic is as follows:
 
 1. ALL LAST 3 STATES ARE RANDOM / UNIFORM
       
@@ -305,96 +317,74 @@ advice: 'LOOP' | note: 'G' | signal: 'L'
 
 advice: 'RELAX' | note: 'H' | signal: 'R'
 
-More logic is exemplified below:
+More logic is exemplified below. We analyze the last two states to know where the history is coming to and the first two states to know where it's coming from. Based on that we decide on the advice to give. 
 
 ```
     else if (last_two == 'random') {
-        cum_score_description = 'becoming uniform'
-        cum_score_recommendation = 'keep doing uniform action'
         cum_score_advice = 'MAINTAIN'
         cum_note = 'I'
         cum_signal = 'M'
     }
     else if (first_two == 'random') {
-        cum_score_description = 'leaving uniform'
-        cum_score_recommendation = 'return to repetitive or introduce variability'
         cum_score_advice = 'LOOP OR VARIATE'
         cum_note = 'J'
         cum_signal = 'W'
     }
     else if (last_two == 'regular') {
-        cum_score_description = 'becoming regular'
-        cum_score_recommendation = 'keep doing a regular action'  
         cum_score_advice = 'MAINTAIN'
         cum_note = 'K'
         cum_signal = 'M'
     }
     else if (first_two == 'regular') {
-        cum_score_description = 'leaving regular'
-        cum_score_recommendation = 'keep doing what you are doing'  
         cum_score_advice = 'MAINTAIN'
         cum_note = 'L'
         cum_signal = 'M'
     }
     else if (last_two == 'fractal') {
-        cum_score_description = 'becoming fractal'
-        cum_score_recommendation = 'stay with the fractal variability'  
         cum_score_advice = 'FRACTALIZE'
         cum_note = 'N'
         cum_signal = 'F'
     }
     else if (first_two == 'fractal') {
-        cum_score_description = 'leaving fractal'
-        cum_score_recommendation = 'bring back variability or make it repetitive'  
         cum_score_advice = 'VARIATE'
         cum_note = 'O'
         cum_signal = 'V'
     }
     else if (last_two == 'complex') {
-        cum_score_description = 'becoming complex'
-        cum_score_recommendation = 'stay with the changing of pattern'  
         cum_score_advice = 'DISRUPT'
         cum_note = 'P'
         cum_signal = 'T'
     }
     else if (first_two == 'complex') {
-        cum_score_description = 'leaving complex'
-        cum_score_recommendation = 'keep changing pattern or introduce variability'  
         cum_score_advice = 'VARIATE'
         cum_note = 'Q'
         cum_signal = 'V'
     }
     else if (counts_alpha['random'] == 2 && last_two != 'random' && first_two != 'random') {
-        cum_score_description = 'unstable random'
-        cum_score_recommendation = 'keep doing repetitive, regularize, or change pattern'  
         cum_score_advice = 'CHOOSE'
         cum_note = 'R'
         cum_signal = 'S'
     }
     else if (counts_alpha['regular'] == 2 && last_two != 'regular' && first_two != 'regular') {
         cum_score_description = 'unstable regular'
-        cum_score_recommendation = 'introduce variability or highly repetitive action' 
         cum_score_advice = 'LOOP OR VARIATE'
         cum_note = 'S' 
         cum_signal = 'W'
     }
     else if (counts_alpha['fractal'] == 2 && last_two != 'fractal' && first_two != 'fractal') {
         cum_score_description = 'unstable fractal'
-        cum_score_recommendation = 'focus on fractal variability'  
         cum_score_advice = 'FRACTALIZE'
         cum_note = 'T'
         cum_signal = 'F'
     }
     else if (counts_alpha['complex'] == 2 && last_two != 'complex' && first_two != 'complex') {
         cum_score_description = 'unstable complex'
-        cum_score_recommendation = 'keep changing pattern'  
         cum_score_advice = 'DISRUPT'
         cum_note = 'U'
         cum_signal = 'T'
     }
     else {
         cum_score_description = 'diverse'
-        cum_score_recommendation = 'focus on fractal variability or keep shifting'
         cum_score_advice = 'FRACTALIZE'
         cum_note = 'V'
         cum_signal = 'F'
@@ -402,25 +392,19 @@ More logic is exemplified below:
 ```
 
 
-
-
-
-
-Also, all the sensors have a cumulative alpha for the last 2 minutes, which is also updated. This total alpha is sent to another channel `/alpha_all/` (the Alpha index) and `/alpha_all_note/` (the A, B, C or D state).
-
---
-
 -- 
  
 
-## Known issues
+# Known issues
 1. [Connection] Unable to connect sensors in Mac with Bluetooth 5.0.
 2. [Connection] Connection with firmware 1.3.0 sensors may fail in Windows. You can:
    * use firmware 1.0.0
    * or use a Bluetooth dongle which support 4.0 or above. Refer to [Add Bluetooth adapter](#add-bluetooth-adapter) to configure your Bluetooth dongle.
 
-## Troubleshooting
-#### Add Bluetooth adapter
+--
+
+# Troubleshooting
+### Add Bluetooth adapter
 If you encounter `Error: No compatible USB Bluetooth 4.0 device found!` when try to run Xsens DOT Sever on Windows, it means you need to add your Bluetooth adapter to the USB device list:
  1. Open Device Manager, find the VID and PID of your Bluetooth adapter.<br>
 &nbsp;<img height="300" src="images/image011.gif"/>
