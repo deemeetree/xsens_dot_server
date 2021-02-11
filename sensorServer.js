@@ -74,6 +74,8 @@ var interval_iterations = {}
 
 let max_iterations = 1200
 
+let terminal_detail = 'all'
+
 
 var transitions =
 [
@@ -96,16 +98,29 @@ var transitions =
 		
 		transFunc:function( component, parameters )
 	    {
-            console.log('OSC UPDATE')
+            console.log('oscUpdate event')
             let _osc_options = osc_options.open
             osc.close({_osc_options});
             
-            console.log('OSC update port:',parameters.port)
-            console.log('OSC update host:',parameters.host)
+            console.log('port:',parameters.port)
+            console.log('host:',parameters.host)
 
             osc_options = { open: { port: parameters.port, host: parameters.host} }
             osc = new OSC({ plugin: new OSC.DatagramPlugin(osc_options) })
             console.log(osc.status())
+
+	    }
+    },
+    {
+		stateName: 'Idle',
+        eventName: 'updateTerminal',
+        nextState: 'Idle',
+		
+		transFunc:function( component, parameters )
+	    {
+            console.log('terminal settings update')
+            
+            terminal_detail = parameters.show
 
 	    }
     },
@@ -886,6 +901,8 @@ var transitions =
 		transFunc:function( component, parameters )
 	    {
             startRecordingToFile( component, parameters.filename );
+
+            console.log('started streaming')
 	    }
     },
     {
@@ -1132,6 +1149,7 @@ var transitions =
 	    {
             component.fileStream.write( component.csvBuffer );
             component.fileStream.end();
+            console.log('stopped streaming')
 	    }
     },
     {
@@ -1417,7 +1435,9 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
          alpha_note = alpha_result['note']
 
         // Display the symbol
+        if (terminal_detail == 'all') {
          generateConsoleSymbol(sensor, interval_dataString[sensor], alpha_score)
+        }
 
         // DEBUG values
         //  console.log('Sensor:',sensor);

@@ -118,7 +118,15 @@
           <span id="oscData">
             <input type="text" name="osc_port" id="osc_port" maxlength="5" size="5" value="49162"> &nbsp; <input type="text" name="osc_host" id="osc_host" maxlength="50" size="15" value="localhost">
           </span>
-
+          
+          <span id="terminalData" class="white">
+            <br>
+            Terminal Data: &nbsp;&nbsp;
+            <select id="terminalUpdate" onchange="updateTerminal()">
+              <option value="all" selected>Show All Data</option>
+              <option value="some">Show Average & Historical Only</option>
+            </select> 
+            </span>
       </div>
     </div>
 
@@ -152,11 +160,25 @@
     </div>
 
 
-    <div width="100%"  min-height="200px" valign="top" align="center" style="display: flex; margin-top: 5em; margin-bottom: 5em;">
+    <div width="100%"  min-height="200px" valign="top" align="left" style="display: flex; margin-top: 5em; margin-bottom: 5em;">
       
-      <p id="AlphaScores" style="min-height:200px;"><p>
+      <p id="AlphaScores" style="min-height:150px;"><p>
 
-      
+    </div>
+
+    <div width="100%"  min-height="200px" valign="top" align="left" style="display: flex; margin-top: 5em; margin-bottom: 5em;">
+
+      <p style="min-height:150px;">
+        <div id="HistoricalAlpha" style="width: 1000; display: flex;">
+          <div style="padding: 10px; width: 90px; color: rgb(255, 255, 255); flex: 1 1 0%; font-size: 45px;">
+            ++
+          </div>
+        <div id="HistoricalAlphaImage" style="max-width: 900px; padding: 10px; overflow-x: scroll; color: rgb(255, 255, 255); display: flex;">
+          
+        </div>
+      </div>
+      </p>
+
     </div>
 
 

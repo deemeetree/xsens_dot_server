@@ -92,7 +92,6 @@ let recommenderIterations = 3
 let triggered_length = 0
 
 
-
 window.onload = function( eventName, parameters  )
 {
     scanControlButton = document.getElementById("scanControlButton");
@@ -123,6 +122,8 @@ window.onload = function( eventName, parameters  )
     oscHostInput = document.getElementById("osc_host");
 
     getLocalStorageOSCData()
+
+    getLocalStorageData()
 
     getConnectedSensors();
 
@@ -289,6 +290,10 @@ function setEventHandlerFunctions()
     {
     };
 
+    eventHandlerFunctions[  'updateTerminal' ] = function( eventName, parameters  )
+    {
+    };
+
     eventHandlerFunctions[  'eightOSAdvice' ] = function( eventName, parameters  )
     {
     };
@@ -415,7 +420,7 @@ function setEventHandlerFunctions()
 
          // Adding alpha component image
         var sensor_image = document.createElement('div')
-        sensor_image.innerHTML = '<img src="alphas/' + alpha_type + '.png" width="150" height="150">';
+        sensor_image.innerHTML = '<img src="alphas/' + alpha_type + '.png" width="120" height="120">';
         sensor_image.style.width = "20%";
         sensor_image.style.padding = "10px";
         sensor_image.style.color = "#FFFFFF";
@@ -507,10 +512,14 @@ function setEventHandlerFunctions()
         // console.log('sensors_num', sensors_num)
         // console.log('current_length', current_length)
 
-        if (((cumulative_length - triggered_length) >= sensors_num) && cumulative_length != 1 && sensors_num != 1) {
+        if ((((cumulative_length - triggered_length) >= sensors_num) && cumulative_length != 1 && sensors_num != 1) ||
+            (sensors_num == 1 && ((cumulative_length - triggered_length) >= recommenderIterations))) {
 
+               
             // Set the number of data points at the point of this update
-            triggered_length = cumulative_length 
+            if (sensors_num != 1) {
+                triggered_length = cumulative_length 
+            }
 
             // Create an empty array for the last alphas of each sensor
             let last_alphas = []
@@ -612,6 +621,23 @@ function setEventHandlerFunctions()
                     cum_alpha_description = 'complex phase-shifting'
                 }
 
+                // Image output
+
+               let cum_alpha_image_container = document.getElementById('HistoricalAlphaImage')
+
+                // Adding alpha component image
+               let cum_alpha_image = document.createElement('div')
+               cum_alpha_image.innerHTML = '<img src="alphas/' + average_alpha_type + '.png" width="120" height="120">';
+               cum_alpha_image.style.width = "20%";
+               cum_alpha_image.style.padding = "10px";
+               cum_alpha_image.style.color = "#FFFFFF";
+               cum_alpha_image.style.flex = "1";
+               cum_alpha_image_container.appendChild(cum_alpha_image);
+
+               console.log(cum_alpha_image)
+       
+               cum_alpha_image_container.scrollLeft = cum_alpha_image_container.scrollWidth;
+
                
                 // For HTML output
                 let cum_alpha_score = cumScore.join(' → ')
@@ -622,6 +648,7 @@ function setEventHandlerFunctions()
                 let cum_score_recommendation = ''
                 let cum_note = ''
                 let cum_signal = ''
+                let cum_advice = ''
 
                 
                 let alpha_all_historic = getHistoricAlphaType(cumScore) 
@@ -630,6 +657,7 @@ function setEventHandlerFunctions()
                 cum_score_recommendation = alpha_all_historic.recommendation
                 cum_note = alpha_all_historic.note
                 cum_signal = alpha_all_historic.signal
+                cum_advice = alpha_all_historic.advice
 
 
                 document.getElementById('alphaRecommendation').innerHTML = 
@@ -643,7 +671,7 @@ function setEventHandlerFunctions()
                 'eightos recommendation:<br><h4>' + cum_score_recommendation + '</h4>';
 
                 console.log('avCumAlpha', avCumAlpha)
-                sendGuiEvent( 'eightOSAdvice', {alpha: parseFloat(avCumAlpha).toFixed(2), note: cum_note, state: cum_score_description, advice: cum_score_recommendation, signal: cum_signal } );
+                sendGuiEvent( 'eightOSAdvice', {alpha: parseFloat(avCumAlpha).toFixed(2), note: cum_note, state: cum_score_description, advice: cum_advice, signal: cum_signal } );
 
 
             }
@@ -672,6 +700,8 @@ function setEventHandlerFunctions()
             measuringSensors.forEach( function (address)
             {
                 var element = document.getElementById(ID_SENSOR_DATA_INDICATOR + address);
+                var alpha_elem = document.getElementById('alpha-image-code-' + address);
+                
                 if (element != null)
                 {
                     var lastDataTime = lastSensorsDataTimeMap[address];
@@ -683,15 +713,18 @@ function setEventHandlerFunctions()
                         if (diff >= 2000)
                         {
                             element.style.color = "#6A6A6A";
+                            alpha_elem.style.color = "#AAAAAA"
                         }
                         else
                         {
                             element.style.color = "#EA6852";
+                            alpha_elem.style.color = "#FFFFFF"
                         }
                     }
                     else
                     {
                         element.style.color = "#6A6A6A";
+                        alpha_elem.style.color = "#AAAAAA"
                     }
                 }
             });
@@ -842,6 +875,8 @@ function loadConnectedSensors( connectedSensors )
             enableOrDisableMeasurementControlButton();
             enableOrDisableLaunchStreamingButton();
         });
+
+        
     }
 }
 
@@ -950,9 +985,10 @@ function addAlphaToList(sensorListName, address, clickHandler )
 
     var sensorAddress = document.createElement('div');
     sensorAddress.innerHTML = address.slice(-2);
+    sensorAddress.id = 'alpha-image-code-' + address;
     sensorAddress.style.padding = "10px";
     sensorAddress.style.width = "100px";
-    sensorAddress.style.color = "#FFFFFF";
+    sensorAddress.style.color = "#666666";
     sensorAddress.style.flex = "1";
     sensorAddress.style.fontSize = "45px";
     label.appendChild(sensorAddress);
@@ -1118,6 +1154,15 @@ function updateOSCPort()
     sendGuiEvent( 'oscUpdate', {port:oscPortInput.value,host:oscHostInput.value} );
 }
 
+function updateTerminal()
+
+
+{
+    let setting = document.getElementById('terminalUpdate').value
+    localStorage.setItem('terminal_detail', setting)
+    sendGuiEvent( 'updateTerminal', {show:setting} );
+}
+
 function getLocalStorageOSCData() 
 {
     if (localStorage.getItem('osc_port')) {
@@ -1127,6 +1172,14 @@ function getLocalStorageOSCData()
         oscHostInput.value = localStorage.getItem('osc_host')
     }
     sendGuiEvent( 'oscUpdate', {port:oscPortInput.value,host:oscHostInput.value} );
+}
+
+function getLocalStorageData() {
+    if (localStorage.getItem('terminal_detail')) {
+        document.querySelector('#terminalUpdate [value="' + localStorage.getItem('terminal_detail') + '"]').selected = true;
+        let setting = document.getElementById('terminalUpdate').value
+        sendGuiEvent( 'updateTerminal', {show:setting} );
+    }
 }
 
 function scanControlButtonClicked()
@@ -1299,10 +1352,16 @@ function stopMeasuringButtonClicked()
         sendGuiEvent( 'stopMeasuring', {addresses:sensor, measuringPayloadId: measuringPayloadId} );
 
         var element = document.getElementById(ID_SENSOR_DATA_INDICATOR + address);
+
+        let alpha_elem = document.getElementById('alpha-image-code-' + address);
+        
         if (element != null)
         {
             element.style.color = "#00000000";
             element.style.background = "#00000000";
+
+            alpha_elem.style.color = "#666666"
+
         }
     }
 }

@@ -194,6 +194,11 @@ class FunctionalComponent
             return;
         }
         else 
+        if (eventName == 'updateTerminal') {
+            this.globalEventHandler( eventName, parameters );
+            return;
+        }
+        else 
         if (eventName == 'eightOSAdvice') {
             this.globalEventHandler( eventName, parameters );
             return;
