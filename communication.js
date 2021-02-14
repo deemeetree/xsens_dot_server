@@ -91,6 +91,8 @@ var cumulativeAlphaScore = []
 let recommenderIterations = 3 
 let triggered_length = 0
 
+let show_alfa = false
+
 
 window.onload = function( eventName, parameters  )
 {
@@ -420,14 +422,23 @@ function setEventHandlerFunctions()
 
          // Adding alpha component image
         var sensor_image = document.createElement('div')
-        sensor_image.innerHTML = '<img src="alphas/' + alpha_type + '.png" width="120" height="120">';
+        let add_alpha = ''
+        if (show_alfa == true) {
+            add_alpha = '<span class="alphatext">' + parseFloat(parameters.alpha).toFixed(2).slice(-3) + '</span>'
+            
+        }
+        sensor_image.innerHTML = add_alpha + '<img class="alphaimage" src="alphas/' + alpha_type + '.png" width="120" height="120">';
         sensor_image.style.width = "20%";
+        sensor_image.style.position = "relative";
         sensor_image.style.padding = "10px";
         sensor_image.style.color = "#FFFFFF";
         sensor_image.style.flex = "1";
+
+        
         sensor_image_container.appendChild(sensor_image);
 
         sensor_image_container.scrollLeft = sensor_image_container.scrollWidth;
+        
         // Update the general sensor sum
 
         // How many alphas we have for this particular sensor?
@@ -627,14 +638,21 @@ function setEventHandlerFunctions()
 
                 // Adding alpha component image
                let cum_alpha_image = document.createElement('div')
-               cum_alpha_image.innerHTML = '<img src="alphas/' + average_alpha_type + '.png" width="120" height="120">';
+               let add_alpha_av = ''
+               if (show_alfa == true) {
+                    add_alpha_av = '<span class="alphatext">' + parseFloat(avCumAlpha).toFixed(2).slice(-3) + '</span>'
+                    
+               }
+               cum_alpha_image.innerHTML = add_alpha_av + '<img class="alphaimage" src="alphas/' + average_alpha_type + '.png" width="120" height="120">';
                cum_alpha_image.style.width = "20%";
                cum_alpha_image.style.padding = "10px";
+               cum_alpha_image.style.position = "relative";
                cum_alpha_image.style.color = "#FFFFFF";
                cum_alpha_image.style.flex = "1";
+
                cum_alpha_image_container.appendChild(cum_alpha_image);
 
-               console.log(cum_alpha_image)
+               
        
                cum_alpha_image_container.scrollLeft = cum_alpha_image_container.scrollWidth;
 
@@ -1170,12 +1188,31 @@ function updateDebug()
     let isChecked = document.getElementById('terminalDebug').checked;
 
     if (isChecked) {
-        localStorage.setItem('terminal_debug', true)
+        localStorage.setItem('terminal_debug', 'true')
         sendGuiEvent( 'updateTerminal', {debug:true} );
     }
     else {
-        localStorage.setItem('terminal_debug', false)
+        localStorage.setItem('terminal_debug', 'false')
         sendGuiEvent( 'updateTerminal', {debug:false} );
+    }
+    
+
+
+}
+
+function showAlfa() 
+
+{
+
+    let isChecked = document.getElementById('showAlpha').checked;
+
+    if (isChecked) {
+        localStorage.setItem('show_alfa', 'true')
+        show_alfa = true
+    }
+    else {
+        localStorage.setItem('show_alfa', 'false')
+        show_alfa = false
     }
     
 
@@ -1201,7 +1238,7 @@ function getLocalStorageData() {
         sendGuiEvent( 'updateTerminal', {show:setting} );
     }
 
-    if (localStorage.getItem('terminal_debug') == true) {
+    if (localStorage.getItem('terminal_debug') == 'true') {
         document.getElementById('terminalDebug').checked = true
         sendGuiEvent( 'updateTerminal', {debug:true} );
     }
@@ -1209,6 +1246,18 @@ function getLocalStorageData() {
         document.getElementById('terminalDebug').checked = false
         sendGuiEvent( 'updateTerminal', {debug:false} );
     }
+
+    if (localStorage.getItem('show_alfa') == 'true') {
+        document.getElementById('showAlpha').checked = true
+        show_alfa = true
+        
+    }
+    else {
+        document.getElementById('showAlpha').checked = false
+        show_alfa = false
+        
+    }
+
 }
 
 function scanControlButtonClicked()

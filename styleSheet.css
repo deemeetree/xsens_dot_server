@@ -195,7 +195,18 @@ body, html
 .whiteish > a {
     color: #bbbbbb!important;
 }
-
+.alphaimage {
+    display: inline-block;
+    
+}
+.alphatext {
+    position: absolute;
+    display: inline-block; 
+    font-family: 'Lucida Console', Courier, monospace;
+    opacity: 0.5;
+    font-size: 12px;
+    margin-top: 28px;
+}
 .modal
 {
     display: none;
