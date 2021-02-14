@@ -125,7 +125,11 @@
             <select id="terminalUpdate" onchange="updateTerminal()">
               <option value="all" selected>Show All Data</option>
               <option value="some">Show Average & Historical Only</option>
+              <option value="sensors">Sensors Only</option>
+              <option value="average">Average Only</option>
+              <option value="historical">Historical Only</option>
             </select> 
+            &nbsp; <input type="checkbox" id="terminalDebug" name="terminalDebug" value="1" onchange="updateDebug()"> show debug info
             </span>
       </div>
     </div>
@@ -160,24 +164,25 @@
     </div>
 
 
-    <div width="100%"  min-height="200px" valign="top" align="left" style="display: flex; margin-top: 5em; margin-bottom: 5em;">
+    <div width="100vw"  min-height="200px" valign="top" align="left" style="display: flex; margin-top: 5em; margin-bottom: 5em;">
       
-      <p id="AlphaScores" style="min-height:150px;"><p>
+      <div id="AlphaScores" style="min-height:150px;">
+      </div>
 
     </div>
 
-    <div width="100%"  min-height="200px" valign="top" align="left" style="display: flex; margin-top: 5em; margin-bottom: 5em;">
+    <div width="100vw"  min-height="200px" valign="top" align="left" style="display: flex; margin-top: 5em; margin-bottom: 5em;">
 
-      <p style="min-height:150px;">
-        <div id="HistoricalAlpha" style="width: 1000; display: flex;">
-          <div style="padding: 10px; width: 90px; color: rgb(255, 255, 255); flex: 1 1 0%; font-size: 45px;">
+      <div style="min-height:150px;">
+        <div id="HistoricalAlpha" style="width: 100vw; display: flex;">
+          <div style="padding: 10px; width: 9%; color: rgb(255, 255, 255); flex: 1 1 0%; font-size: 45px;">
             ++
           </div>
-        <div id="HistoricalAlphaImage" style="max-width: 900px; padding: 10px; overflow-x: scroll; color: rgb(255, 255, 255); display: flex;">
+        <div id="HistoricalAlphaImage" style="max-width: 91%; padding: 10px; overflow-x: scroll; color: rgb(255, 255, 255); display: flex;">
           
         </div>
       </div>
-      </p>
+    </div>
 
     </div>
 

@@ -75,6 +75,7 @@ var interval_iterations = {}
 let max_iterations = 1200
 
 let terminal_detail = 'all'
+let terminal_debug = false
 
 
 var transitions =
@@ -120,7 +121,18 @@ var transitions =
 	    {
             console.log('terminal settings update')
             
-            terminal_detail = parameters.show
+            if (parameters && parameters.show) {
+                terminal_detail = parameters.show
+            }
+
+            if (parameters && parameters.debug) {
+                if (parameters.debug == "true" || parameters.debug == true || parameters.debug == 1) {
+                    terminal_debug = true
+                }
+                else {
+                    terminal_debug = false
+                }
+            }
 
 	    }
     },
@@ -143,16 +155,24 @@ var transitions =
          alpha_note = alpha_result['note']
 
         // Display the symbol
+        if (terminal_detail != 'sensors' && terminal_detail != 'historical') {
          console.log(' ')
+         if (terminal_debug) {
+            console.log(' ')
+            console.log('~~~~~~[ALL LAST AVERAGE]~~~~~~~')
+         }
+         generateConsoleSymbol('AVRG', alpha_exponent, alpha_score, 'ALL', alpha_note)
+         if (terminal_debug) {
+             console.log('~~~~~~~~[END AVERAGE]~~~~~~~~~~')
+             console.log(' ')
+         }
          console.log(' ')
-         console.log('~~~~~~[ALL LAST AVERAGE]~~~~~~~')
-         generateConsoleSymbol('AVRG', alpha_exponent, alpha_score)
-         console.log('~~~~~~~~[END AVERAGE]~~~~~~~~~~')
-         console.log(' ')
-         console.log(' ')
-        // DEBUG values
-        //  console.log('Sensor:',sensor);
-        //  console.log('Alpha Component:',alpha_exponent);
+         if (terminal_debug) {
+         // DEBUG values
+            console.log('Sensor: ALL');
+            console.log('Alpha Component:',alpha_exponent);
+         }
+        }
 
          sendAlphaViaOSC('alpha_avrg', 'all', alpha_exponent, alpha_note)
 
@@ -185,21 +205,29 @@ var transitions =
             alpha_signal = parameters.signal
    
            // Display the symbol
+           if (terminal_detail != 'sensors' && terminal_detail != 'average') {
             console.log(' ')
+            if (terminal_debug) {
+                console.log(' ')
+                console.log('++++++[ALL HISTORICAL]++++++')
+            }
+            generateConsoleSymbol('ALL', alpha_exponent, alpha_score, 'HST', alpha_note, alpha_signal)
+            if (terminal_debug) {
+                console.log(' ')
+                console.log('state: ' + alpha_state)
+                console.log('advice: ' + alpha_advice)
+                console.log('note: ' + alpha_note + ' | signal: ' + alpha_signal)
+                console.log(' ')
+                console.log('++++++[END HISTORICAL]++++++')
+                console.log(' ')
+            }
             console.log(' ')
-            console.log('++++++[ALL HISTORICAL]++++++')
-            generateConsoleSymbol('HIST', alpha_exponent, alpha_score)
-            console.log(' ')
-            console.log('state: ' + alpha_state)
-            console.log('advice: ' + alpha_advice)
-            console.log('note: ' + alpha_note + ' | signal: ' + alpha_signal)
-            console.log(' ')
-            console.log('++++++[END HISTORICAL]++++++')
-            console.log(' ')
-            console.log(' ')
-           // DEBUG values
-           //  console.log('Sensor:',sensor);
-           //  console.log('Alpha Component:',alpha_exponent);
+            if (terminal_debug) {
+            // DEBUG values
+             console.log('Sensor: ALL');
+             console.log('Alpha Component:',alpha_exponent);
+            }
+            }
    
             sendAlphaViaOSC('alpha_history', 'all', alpha_exponent, alpha_note, alpha_signal)
 
@@ -237,20 +265,29 @@ var transitions =
    
            // Display the symbol
             console.log(' ')
+            
+            if (terminal_debug) {
+                console.log(' ')
+                console.log('++++++['+ac+'] HISTORICAL++++++')
+            }
+            
+            generateConsoleSymbol(alpha_sensor, alpha_exponent, alpha_score, 'HST', alpha_note, alpha_signal)
+
+            if (terminal_debug) {
+                console.log(' ')
+                console.log('state: ' + alpha_state)
+                console.log('advice: ' + alpha_advice)
+                console.log('note: ' + alpha_note + ' | signal: ' + alpha_signal)
+                console.log(' ')
+                console.log('++++[END ['+ac+'] HISTORICAL]++++')
+                console.log(' ')
+            }
             console.log(' ')
-            console.log('++++++['+ac+'] HISTORICAL++++++')
-            generateConsoleSymbol(alpha_sensor, alpha_exponent, alpha_score)
-            console.log(' ')
-            console.log('state: ' + alpha_state)
-            console.log('advice: ' + alpha_advice)
-            console.log('note: ' + alpha_note + ' | signal: ' + alpha_signal)
-            console.log(' ')
-            console.log('++++[END ['+ac+'] HISTORICAL]++++')
-            console.log(' ')
-            console.log(' ')
-           // DEBUG values
-           //  console.log('Sensor:',sensor);
-           //  console.log('Alpha Component:',alpha_exponent);
+            if (terminal_debug) {
+             // DEBUG values
+             console.log('Sensor:',parameters.sensor);
+             console.log('Alpha Component:',alpha_exponent);
+            }
    
             sendAlphaViaOSC('alpha_history', alpha_sensor, alpha_exponent, alpha_note, alpha_signal)
 
@@ -1124,8 +1161,11 @@ var transitions =
                     // DEBUG BELOW
                     // console.log('Firing the Function on Data')
                     // console.log(interval_data)
-                    // console.log('Interval Iteration')
-                    // console.log(interval_iterations)
+
+                    
+                    // console.log('firing on iterations:', interval_iterations)
+                    
+                    
                 
                     // For each sensor, calculate the Fractal signature
 
@@ -1435,14 +1475,16 @@ function calculateDFA(sensor, interval_data, py_iterations, max_iterations, comp
          alpha_note = alpha_result['note']
 
         // Display the symbol
-        if (terminal_detail == 'all') {
-         generateConsoleSymbol(sensor, interval_dataString[sensor], alpha_score)
+        if (terminal_detail == 'all' || terminal_detail == 'sensors') {
+         generateConsoleSymbol(sensor, interval_dataString[sensor], alpha_score, null, alpha_note)
         }
 
         // DEBUG values
         //  console.log('Sensor:',sensor);
         //  console.log('Alpha Component:',parseFloat(interval_dataString[sensor]));
-        //  console.log('based on the array length:', interval_data[sensor].length)
+        if (terminal_debug) {
+           console.log('based on the array length:', interval_data[sensor].length)
+        }
          
 
          // TODO make another function which sends composite OSC
@@ -1536,7 +1578,7 @@ function getAlphaType(alpha) {
 // -- Display the current state symbol --
 // ---------------------------------------------------------------------------------------
 
-function generateConsoleSymbol(sensor_code, alpha_exp, state) {
+function generateConsoleSymbol(sensor_code, alpha_exp, state, message_type, alpha_note, alpha_signal) {
 
     let a = ''
     
@@ -1552,17 +1594,33 @@ function generateConsoleSymbol(sensor_code, alpha_exp, state) {
 
     let alpha_sign = ""
 
+    let d = '█'
+    if (alpha_note) {
+        d = alpha_note
+    }
+
+    let s = '█'
+    if (alpha_signal) {
+        s = alpha_signal
+    }
+
+    let m = '     '
+    if (message_type) {
+        m = ' ' + message_type + ' '
+    }
+
+
     if (state == 'random') {
         c = 'uniform'
         alpha_sign = "\
-        ▐█         ╟▌    \n\
+        ▐"+d+"   "+m+" ╟▌    \n\
         ▐▌         ╟▌    \n\
         ▐▌ " +c +" ╟▌    \n\
         ▐▌         ╟▌    \n\
         ▐▌         ╟▌    \n\
         ▐▌  "+b +" ╟▌    \n\
         ▐▌         ╟▌    \n\
-   ╓▄▄▄▄╫█▄▄▄▄▄▄▄▄▄██▄▄▄▄▄\n\
+   ╓▄▄▄▄╫█▄▄▄▄▄▄▄▄▄"+s+"█▄▄▄▄▄\n\
         ▐▌         ╟▌    \n\
         ▐▌   "+a+"  ╟▌    \n\
         ▐█▄▄▄▄▄▄▄▄▄█▌    "
@@ -1576,23 +1634,23 @@ function generateConsoleSymbol(sensor_code, alpha_exp, state) {
              ╟█           \n\
              ╟█           \n\
         █  " +b+"  █      \n\
-       ██▌   ╟█   ▐██     \n\
+       "+s+"█▌   ╟█   ▐██     \n\
       █▌ █▌  ╟█  ╓█  █    \n\
      █▌   █▌"+a+" █─  ╙█   \n\
     ██     █▌╟█┌█`    ╟█  \n\
    ▐█       ████▌      █▌ \n\
-  ╓█         ██▌        █▌"
+  ╓█         █"+d+"▌  "+m+" █▌"
 
     }
     else if (state == 'fractal') {
         c = 'fractl'
         alpha_sign = "\
-        ▀█▄      ▄█▀      \n\
+        ▀█▄ "+m+"▄█▀      \n\
           ▀█▄  ▄█▀        \n\
             ▀██▀          \n\
+             "+d+"▌           \n\
              █▌           \n\
-             █▌           \n\
-            ████          \n\
+            █"+s+"██          \n\
           █▀"+a+"▀█        \n\
   ▄▄▄▄▄▄█▀`       ▀█▄▄▄▄▄▄\n\
        █▌  " +b+"  ▐█\n\
@@ -1606,14 +1664,14 @@ function generateConsoleSymbol(sensor_code, alpha_exp, state) {
       ▀█▄ "+b +"  ▄█▀   \n\
        ▀█▄      ▄█▀▀▀▀▀ \n\
          ▀█▄  ▄█▀       \n\
-           └██─         \n\
+           └█"+d+"─         \n\
           " + c + "     \n\
             ╟▌          \n\
             ╟▌          \n\
            "+a+"        \n\
             ╟▌          \n\
-        ▄▄█▀▀           \n\
-    ▄▄█▀▀╙               "     
+        ▄▄█▀"+s+"          \n\
+    ▄▄█▀▀╙  "+m+"       "     
     }
 
 

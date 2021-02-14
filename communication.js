@@ -496,7 +496,7 @@ function setEventHandlerFunctions()
             elem_advice.innerHTML += '<br>→ ' + this_advice;
 
 
-            sendGuiEvent( 'sensorAdvice', {alpha: parseFloat(thisCumAlpha).toFixed(2), sensor: this_sensor, note: this_note, state: this_score_state, advice: this_score_recommendation, signal: this_signal } );
+            sendGuiEvent( 'sensorAdvice', {alpha: parseFloat(thisCumAlpha).toFixed(2), sensor: this_sensor, note: this_note, state: this_score_state, advice: this_advice, signal: this_signal } );
 
 
 
@@ -978,7 +978,7 @@ function addAlphaToList(sensorListName, address, clickHandler )
 
     var label = document.createElement("div");
     label.setAttribute( "id", sensorListName+address );
-    label.style.width = "100%";
+    label.style.width = "100vw";
     label.style.display = 'flex';
     sensorListElement.appendChild(label);
 
@@ -987,7 +987,7 @@ function addAlphaToList(sensorListName, address, clickHandler )
     sensorAddress.innerHTML = address.slice(-2);
     sensorAddress.id = 'alpha-image-code-' + address;
     sensorAddress.style.padding = "10px";
-    sensorAddress.style.width = "100px";
+    sensorAddress.style.width = "10%";
     sensorAddress.style.color = "#666666";
     sensorAddress.style.flex = "1";
     sensorAddress.style.fontSize = "45px";
@@ -996,7 +996,7 @@ function addAlphaToList(sensorListName, address, clickHandler )
     // Adding alpha component data
     var sensorAlpha = document.createElement('div')
     sensorAlpha.innerHTML = ' ';
-    sensorAlpha.style['max-width'] = "900px";
+    sensorAlpha.style['max-width'] = "90%";
     sensorAlpha.id = 'alpha-image-' + address;
     sensorAlpha.style.padding = "10px";
     sensorAlpha.style['overflow-x'] = 'scroll';
@@ -1163,6 +1163,25 @@ function updateTerminal()
     sendGuiEvent( 'updateTerminal', {show:setting} );
 }
 
+function updateDebug() 
+
+{
+
+    let isChecked = document.getElementById('terminalDebug').checked;
+
+    if (isChecked) {
+        localStorage.setItem('terminal_debug', true)
+        sendGuiEvent( 'updateTerminal', {debug:true} );
+    }
+    else {
+        localStorage.setItem('terminal_debug', false)
+        sendGuiEvent( 'updateTerminal', {debug:false} );
+    }
+    
+
+
+}
+
 function getLocalStorageOSCData() 
 {
     if (localStorage.getItem('osc_port')) {
@@ -1175,10 +1194,20 @@ function getLocalStorageOSCData()
 }
 
 function getLocalStorageData() {
+    
     if (localStorage.getItem('terminal_detail')) {
         document.querySelector('#terminalUpdate [value="' + localStorage.getItem('terminal_detail') + '"]').selected = true;
         let setting = document.getElementById('terminalUpdate').value
         sendGuiEvent( 'updateTerminal', {show:setting} );
+    }
+
+    if (localStorage.getItem('terminal_debug') == true) {
+        document.getElementById('terminalDebug').checked = true
+        sendGuiEvent( 'updateTerminal', {debug:true} );
+    }
+    else {
+        document.getElementById('terminalDebug').checked = false
+        sendGuiEvent( 'updateTerminal', {debug:false} );
     }
 }
 
