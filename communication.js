@@ -423,8 +423,11 @@ function setEventHandlerFunctions()
          // Adding alpha component image
         var sensor_image = document.createElement('div')
         let add_alpha = ''
+        let add_css = ''
+        if (alpha_type == 'regular') add_css = 'moveup'
+        if (alpha_type == 'random') add_css = 'moveright'
         if (show_alfa == true) {
-            add_alpha = '<span class="alphatext">' + parseFloat(parameters.alpha).toFixed(2).slice(-3) + '</span>'
+            add_alpha = '<span class="alphatext ' + add_css + '">' + parseFloat(parameters.alpha).toFixed(2).slice(-3) + '</span>'
             
         }
         sensor_image.innerHTML = add_alpha + '<img class="alphaimage" src="alphas/' + alpha_type + '.png" width="120" height="120">';
@@ -639,8 +642,11 @@ function setEventHandlerFunctions()
                 // Adding alpha component image
                let cum_alpha_image = document.createElement('div')
                let add_alpha_av = ''
+               let add_css = ''
+               if (average_alpha_type == 'regular') add_css = 'moveup'
+               if (average_alpha_type == 'random') add_css = 'moveright'
                if (show_alfa == true) {
-                    add_alpha_av = '<span class="alphatext">' + parseFloat(avCumAlpha).toFixed(2).slice(-3) + '</span>'
+                    add_alpha_av = '<span class="alphatext ' + add_css + '">' + parseFloat(avCumAlpha).toFixed(2).slice(-3) + '</span>'
                     
                }
                cum_alpha_image.innerHTML = add_alpha_av + '<img class="alphaimage" src="alphas/' + average_alpha_type + '.png" width="120" height="120">';
@@ -997,6 +1003,7 @@ function addAlphaToList(sensorListName, address, clickHandler )
     var label = document.createElement("div");
     label.setAttribute( "id", sensorListName+address );
     label.style.width = "100vw";
+    
     label.style.display = 'flex';
     sensorListElement.appendChild(label);
 
@@ -1017,6 +1024,7 @@ function addAlphaToList(sensorListName, address, clickHandler )
     sensorAlpha.style['max-width'] = "90%";
     sensorAlpha.id = 'alpha-image-' + address;
     sensorAlpha.style.padding = "10px";
+    sensorAlpha.style['margin-right'] = "20px"
     sensorAlpha.style['overflow-x'] = 'scroll';
     sensorAlpha.style.color = "#FFFFFF";
     sensorAlpha.style.display = "flex";
