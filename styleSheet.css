@@ -71,8 +71,21 @@ body, html
 }
 
 .horizontalAlpha::-webkit-scrollbar {
-    height: 4px;              /* height of horizontal scrollbar ← You're missing this */
+    height: 4px!important;              /* height of horizontal scrollbar ← You're missing this */
+    border: 1px solid #444444;
     scrollbar-color: dark;
+}
+
+  
+.horizontalAlpha::-webkit-scrollbar-track {
+    border-radius: 0;
+    background: #444444;
+}
+  
+.horizontalAlpha::-webkit-scrollbar-thumb {
+    border-radius: 0;
+    width: 100px;
+    background: #666666;
 }
 
 .dropbtn
