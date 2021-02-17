@@ -70,6 +70,11 @@ body, html
     width: 50%;
 }
 
+.horizontalAlpha::-webkit-scrollbar {
+    height: 4px;              /* height of horizontal scrollbar ← You're missing this */
+    scrollbar-color: dark;
+}
+
 .dropbtn
 {
     cursor: pointer;

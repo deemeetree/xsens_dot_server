@@ -1023,6 +1023,7 @@ function addAlphaToList(sensorListName, address, clickHandler )
     sensorAlpha.innerHTML = ' ';
     sensorAlpha.style['max-width'] = "90%";
     sensorAlpha.id = 'alpha-image-' + address;
+    sensorAlpha.class = 'horizontalAlpha'
     sensorAlpha.style.padding = "10px";
     sensorAlpha.style['margin-right'] = "20px"
     sensorAlpha.style['overflow-x'] = 'scroll';
