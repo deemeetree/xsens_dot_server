@@ -1560,16 +1560,16 @@ function getAlphaType(alpha) {
     if (alpha < 0.42) {
         return {score:'random', note: 'A'}
     }
-    else if (alpha >= 0.42 && alpha <= 0.60) {
+    else if (alpha >= 0.42 && alpha <= 0.63) {
         return  {score:'random', note: 'A'}
     }
-    else if (alpha > 0.60 && alpha < 0.90) {
+    else if (alpha > 0.63 && alpha < 0.85) {
        return  {score:'regular', note: 'B'}
     }
-    else if (alpha >= 0.90 && alpha <= 1.10) {
+    else if (alpha >= 0.85 && alpha <= 1.15) {
        return {score:'fractal', note: 'C'}
     }
-    else if (alpha > 1.10) {
+    else if (alpha > 1.15) {
        return {score:'complex', note: 'D'}
     }
 }

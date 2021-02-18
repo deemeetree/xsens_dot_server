@@ -34,19 +34,19 @@ function startPython() {
                 console.log('negative correlation')
                 beep([0,1100,1100,400,400])
             }
-            else if (interval_dataString >= 0.42 && interval_dataString <= 0.58) {
+            else if (interval_dataString >= 0.42 && interval_dataString <= 0.63) {
                 console.log('random white noise movement')
                 beep(3)
             }
-            else if (interval_dataString > 0.58 && interval_dataString < 0.90) {
+            else if (interval_dataString > 0.63 && interval_dataString < 0.85) {
                 console.log('regular, mundane movement')
                 beep([0,1100,1100,400,400])
             }
-            else if (interval_dataString > 0.90 && interval_dataString < 1.10) {
+            else if (interval_dataString >= 0.85 && interval_dataString <= 1.15) {
                 console.log('fractal movement')
                 beep(5)
             }
-            else if (interval_dataString > 1.10) {
+            else if (interval_dataString > 1.15) {
                 console.log('organized, highly complex (pathological) movement')
                 beep([0,400,400,400,400,400,400,400])
             }

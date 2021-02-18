@@ -1476,16 +1476,16 @@ function deleteFilesButtonClick()
 
 function getAlphaType(alpha) {
 
-    if (alpha <= 0.60) {
+    if (alpha <= 0.63) {
        return 'random'
     }
-    else if (alpha > 0.60 && alpha < 0.90) {
+    else if (alpha > 0.63 && alpha < 0.85) {
        return 'regular'
     }
-    else if (alpha >= 0.90 && alpha <= 1.10) {
+    else if (alpha >= 0.85 && alpha <= 1.15) {
        return 'fractal'
     }
-    else if (alpha > 1.10) {
+    else if (alpha > 1.15) {
        return 'complex'
     }
 }
