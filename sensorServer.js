@@ -264,29 +264,32 @@ var transitions =
             let ac = alpha_sensor.slice(-2)
    
            // Display the symbol
-            console.log(' ')
-            
-            if (terminal_debug) {
-                console.log(' ')
-                console.log('++++++['+ac+'] HISTORICAL++++++')
-            }
-            
-            generateConsoleSymbol(alpha_sensor, alpha_exponent, alpha_score, 'HST', alpha_note, alpha_signal)
 
-            if (terminal_debug) {
+           if (terminal_detail != 'average') {
                 console.log(' ')
-                console.log('state: ' + alpha_state)
-                console.log('advice: ' + alpha_advice)
-                console.log('note: ' + alpha_note + ' | signal: ' + alpha_signal)
+                
+                if (terminal_debug) {
+                    console.log(' ')
+                    console.log('++++++['+ac+'] HISTORICAL++++++')
+                }       
+                
+                generateConsoleSymbol(alpha_sensor, alpha_exponent, alpha_score, 'HST', alpha_note, alpha_signal)
+
+                if (terminal_debug) {
+                    console.log(' ')
+                    console.log('state: ' + alpha_state)
+                    console.log('advice: ' + alpha_advice)
+                    console.log('note: ' + alpha_note + ' | signal: ' + alpha_signal)
+                    console.log(' ')
+                    console.log('++++[END ['+ac+'] HISTORICAL]++++')
+                    console.log(' ')
+                }
                 console.log(' ')
-                console.log('++++[END ['+ac+'] HISTORICAL]++++')
-                console.log(' ')
-            }
-            console.log(' ')
-            if (terminal_debug) {
-             // DEBUG values
-             console.log('Sensor:',parameters.sensor);
-             console.log('Alpha Component:',alpha_exponent);
+                if (terminal_debug) {
+                // DEBUG values
+                console.log('Sensor:',parameters.sensor);
+                console.log('Alpha Component:',alpha_exponent);
+                }
             }
    
             sendAlphaViaOSC('alpha_history', alpha_sensor, alpha_exponent, alpha_note, alpha_signal)
