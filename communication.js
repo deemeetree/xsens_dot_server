@@ -142,7 +142,7 @@ function setEventHandlerFunctions()
     eventHandlerFunctions[ 'sensorDiscovered' ] = function( eventName, parameters  )
     {
         addSensorToList( discoveredSensors, "DiscoveredSensors", parameters.address );
-        addAlphaToList( "AlphaScores", parameters.address );
+        
     };
 
     eventHandlerFunctions[ 'scanningStarted' ] = function( eventName, parameters  )
@@ -180,6 +180,8 @@ function setEventHandlerFunctions()
             element.onmouseout = onButtonMouseOver;
         }
 
+        addAlphaToList( "AlphaScores", parameters.address );
+
         enableOrDisableMeasurementControlButton();
         enableOrDisableLaunchStreamingButton();
 
@@ -190,6 +192,8 @@ function setEventHandlerFunctions()
         console.log("sensorDisconnected " + parameters.address);
 
         removeSensor( measuringSensors, parameters.address );
+
+
         
         var logoImage = document.getElementById(ID_LOGO_IMAGE + parameters.address);
         if (logoImage != null)
@@ -993,6 +997,15 @@ function addSensorToList( sensorList, sensorListName, address, clickHandler )
     label.appendChild(newLine);
 }
 
+function removeAlphaFromList( sensorListName, address )
+{
+    let idx = sensorList.indexOf( address );
+    if( idx == -1 ) return;
+
+    let element = document.getElementById(sensorListName+address);
+    element.parentNode.removeChild(element);
+}
+
 function addAlphaToList(sensorListName, address, clickHandler )
 {
 
@@ -1279,7 +1292,9 @@ function scanControlButtonClicked()
 
         while( discoveredSensors.length != 0 )
         {
+            removeAlphaFromList("AlphaScores", discoveredSensors[0]);
             removeSensorFromList( discoveredSensors, "DiscoveredSensors", discoveredSensors[0] );
+            
         }
 
         loadConnectedSensors(connectedSensors);
@@ -1479,13 +1494,13 @@ function getAlphaType(alpha) {
     if (alpha <= 0.63) {
        return 'random'
     }
-    else if (alpha > 0.63 && alpha < 0.85) {
+    else if (alpha > 0.63 && alpha < 0.90) {
        return 'regular'
     }
-    else if (alpha >= 0.85 && alpha <= 1.15) {
+    else if (alpha >= 0.90 && alpha <= 1.10) {
        return 'fractal'
     }
-    else if (alpha > 1.15) {
+    else if (alpha > 1.10) {
        return 'complex'
     }
 }

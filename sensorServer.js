@@ -1124,8 +1124,16 @@ var transitions =
             // console.log(parameters)
            
 
-            let acc_sum = (Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3
+//          let acc_sum = (Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z))/3 // MEAN DEVIATION
 
+  //         let acc_sum = Math.sqrt(((parameters.acc_x*parameters.acc_x) + (parameters.acc_y*parameters.acc_y) + (parameters.acc_z*parameters.acc_z))/3) // STANDARD DEVIATION
+
+ //          let acc_sum = (Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z)) // ABSOLUTE SUM
+
+  //          let acc_sum = Math.sqrt((parameters.acc_x*parameters.acc_x) + (parameters.acc_y*parameters.acc_y) + (parameters.acc_z*parameters.acc_z)) // GEODESIC 3D DISTANCE
+
+  //          let acc_sum = ((parameters.acc_x*parameters.acc_x) + (parameters.acc_y*parameters.acc_y) + (parameters.acc_z*parameters.acc_z))/3 // VARIANCE
+  let acc_sum = Math.sqrt((parameters.gyr_x*parameters.gyr_x) + (parameters.gyr_y*parameters.gyr_y) + (parameters.gyr_z*parameters.gyr_z)) // GEODESIC 3D DISTANCE GYRO
             if (!interval_data[parameters.address]) {
                 interval_data[parameters.address] = []
             }
@@ -1566,13 +1574,13 @@ function getAlphaType(alpha) {
     else if (alpha >= 0.42 && alpha <= 0.63) {
         return  {score:'random', note: 'A'}
     }
-    else if (alpha > 0.63 && alpha < 0.85) {
+    else if (alpha > 0.63 && alpha < 0.90) {
        return  {score:'regular', note: 'B'}
     }
-    else if (alpha >= 0.85 && alpha <= 1.15) {
+    else if (alpha >= 0.90 && alpha <= 1.10) {
        return {score:'fractal', note: 'C'}
     }
-    else if (alpha > 1.15) {
+    else if (alpha > 1.10) {
        return {score:'complex', note: 'D'}
     }
 }
