@@ -1130,10 +1130,11 @@ var transitions =
 
  //          let acc_sum = (Math.abs(parameters.acc_x) + Math.abs(parameters.acc_y) + Math.abs(parameters.acc_z)) // ABSOLUTE SUM
 
-  //          let acc_sum = Math.sqrt((parameters.acc_x*parameters.acc_x) + (parameters.acc_y*parameters.acc_y) + (parameters.acc_z*parameters.acc_z)) // GEODESIC 3D DISTANCE
+  //          let acc_sum = Math.sqrt((parameters.acc_x*parameters.acc_x) + (parameters.acc_y*parameters.acc_y) + (parameters.acc_z*parameters.acc_z)) // CARTESIAN 3D DISTANCE
 
   //          let acc_sum = ((parameters.acc_x*parameters.acc_x) + (parameters.acc_y*parameters.acc_y) + (parameters.acc_z*parameters.acc_z))/3 // VARIANCE
-  let acc_sum = Math.sqrt((parameters.gyr_x*parameters.gyr_x) + (parameters.gyr_y*parameters.gyr_y) + (parameters.gyr_z*parameters.gyr_z)) // GEODESIC 3D DISTANCE GYRO
+   let acc_sum = Math.sqrt((parameters.gyr_x*parameters.gyr_x) + (parameters.gyr_y*parameters.gyr_y) + (parameters.gyr_z*parameters.gyr_z)) // CARTESIAN 3D DISTANCE GYRO
+  //let acc_sum = Math.sqrt((parameters.mag_x*parameters.mag_x) + (parameters.mag_y*parameters.mag_y) + (parameters.mag_z*parameters.mag_z    )) // CARTESIAN 3D DISTANCE GYRO
             if (!interval_data[parameters.address]) {
                 interval_data[parameters.address] = []
             }
