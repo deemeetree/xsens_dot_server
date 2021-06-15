@@ -884,6 +884,7 @@ var transitions =
 		
 		transFunc:function( component, parameters )
 	    {
+            
 	    }
     },
     {

@@ -93,6 +93,11 @@ let triggered_length = 0
 
 let show_alfa = false
 
+// graph of live parameters
+let oscGraph = {}
+let oscData = {}
+let oscGraphLabels = {}
+
 
 window.onload = function( eventName, parameters  )
 {
@@ -294,6 +299,7 @@ function setEventHandlerFunctions()
 
     eventHandlerFunctions[  'oscUpdate' ] = function( eventName, parameters  )
     {
+        
     };
 
     eventHandlerFunctions[  'updateTerminal' ] = function( eventName, parameters  )
@@ -757,6 +763,60 @@ function setEventHandlerFunctions()
                 }
             });
         }
+
+
+        // CHart the data
+
+        
+        
+        
+        if (!oscData[address]) {
+            oscData[address] = []
+            oscGraphLabels[address] = ['1']
+        }
+        else {
+            oscData[address].push(calculateDistance(parameters.gyr_x, parameters.gyr_y, parameters.gyr_z))
+        }
+
+        if (oscData[address].length >= 10) {
+            
+
+            let data_to_add = oscData[address]
+
+            oscData[address] = []
+
+            let chart = oscGraph[address]
+
+            const data = chart.data
+
+            if (!data.datasets[0].data[0] || data.datasets[0].data[0] == 0) {
+
+                // first data recorded
+                data.datasets[0].data = [meanOfVector(data_to_add)]
+            
+
+            }
+            else {
+                // show last 20 seconds only 
+                if (data.datasets[0].data.length >= 120) {
+                    data.datasets[0].data.shift()
+                    oscGraphLabels[address].shift()
+                }
+                data.datasets[0].data.push(meanOfVector(data_to_add))
+                
+            }
+
+            data.labels = oscGraphLabels[address]
+
+            
+            oscGraphLabels[address].push((parseInt(oscGraphLabels[address][oscGraphLabels[address].length - 1]) + 1).toString()) 
+            
+    
+            chart.update();
+            
+        }   
+
+
     };
 
     eventHandlerFunctions[ 'syncingDone' ] = function( eventName, parameters  )
@@ -1035,6 +1095,7 @@ function addAlphaToList(sensorListName, address, clickHandler )
     var sensorAlpha = document.createElement('div')
     sensorAlpha.innerHTML = ' ';
     sensorAlpha.style['max-width'] = "90%";
+    sensorAlpha.style.height = "163px";
     sensorAlpha.id = 'alpha-image-' + address;
     sensorAlpha.class = 'horizontalAlpha'
     sensorAlpha.style.padding = "10px";
@@ -1044,9 +1105,99 @@ function addAlphaToList(sensorListName, address, clickHandler )
     sensorAlpha.style.display = "flex";
     label.appendChild(sensorAlpha);
 
+    let alphas_Container = document.getElementById('alpha-image-' + address)
+
+    // Adding alpha component image
+    var sensor_chart = document.createElement('canvas')
+    sensor_chart.style.width = "100%";
+    sensor_chart.style.height = "150px";
+    sensor_chart.id = 'osc-chart-' + address;
+    sensor_chart.style.position = "absolute";
+    sensor_chart.style.padding = "20px 0px 40px 0px";
+    sensor_chart.style.margin = "0px";
+    sensor_chart.style.right = "0"
+    sensor_chart.style.float = "right"
+    sensor_chart.style.color = "#FFFFFF";
+    sensor_chart.style.flex = "1";
+    sensor_chart.style['text-align'] = "right"
+    label.appendChild(sensor_chart);
 
     var newLine = document.createElement( "br" );
     label.appendChild(newLine);
+
+
+    // build a chart for canvas
+
+    
+
+    let graph_data = {
+        labels: [],
+        datasets: []
+    }
+
+    let all_data = [] 
+
+    let chart_labels = []
+
+    graph_data = {
+        labels: ['0'],
+        datasets: [{
+            label: 'speed',
+            data: [0],
+            borderWidth: 5,
+            pointBorderWidth: 1,
+            pointRadius: 0,
+            tension: 0.4,
+            borderColor: 'rgba(0, 220, 184, 1)',
+            backgroundColor: 'rgba(0, 220, 184, 1)',
+            pointBackgroundColor: 'rgba(0, 220, 184, 1)',
+            fill: false
+        }]
+    }
+
+    // rgba(0, 220, 184, 1)
+
+    chart_labels = ['0']
+
+    all_data = [1]
+
+    let ctx = document.getElementById('osc-chart-' + address).getContext('2d');
+    
+    oscGraph[address] = new Chart(ctx, {
+        type: 'line',
+        data: graph_data,
+        defaultFontSize: 10,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              intersect: false,
+            },
+            scales: {
+                y: {
+                    // max: Math.max.apply(this, all_data),
+                    beginAtZero: true,
+                    scale: 'logarithmic',
+                    display: false,
+                    ticks: {
+                        stepSize: 1,
+                    }
+                },
+                x: {
+                    display: false
+                }
+         
+            },
+            plugins: {
+                legend: {
+                    display: false,
+                }
+            }
+        }
+    });
+
+    
+    
 }
 
 function initButtonStyle(connectionControlButton)
@@ -1665,6 +1816,15 @@ function getHistoricAlphaType(cumScore) {
     }
 }
 
+
+function meanOfVector (x) {
+    let mean = x => x.reduce( ( p, c ) => p + c, 0 ) / x.length;
+    return mean(x)
+}
+
+function calculateDistance (x,y,z) {
+    return Math.sqrt((x*x) + (y*y) + (z*z)) // CARTESIAN 3D DISTANCE GYRO
+}
 
 
 // ---------------------------------------------------------------------------------------
